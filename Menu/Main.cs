@@ -63,7 +63,6 @@ using static Seralyth.Utilities.FileUtilities;
 using static Seralyth.Utilities.RandomUtilities;
 using ButtonCollider = Seralyth.Classes.Menu.ButtonCollider;
 using CommonUsages = UnityEngine.XR.CommonUsages;
-using Console = Seralyth.Classes.Menu.Console;
 using JoinType = GorillaNetworking.JoinType;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -119,14 +118,6 @@ namespace Seralyth.Menu
             TryOnRoom = GetObject("Environment Objects/TriggerZones_Prefab/ZoneTransitions_Prefab/Cosmetics Room Triggers/TryOnRoom");
 
             fullModAmount ??= Buttons.buttons.SelectMany(list => list).ToArray().Length;
-
-            GameObject ConsoleObject = Console.LoadConsoleImmediately();
-
-            if (ServerData.ServerDataEnabled)
-            {
-                ConsoleObject.AddComponent<FriendManager>();
-                ConsoleObject.AddComponent<PatreonManager>();
-            }
 
             try
             {
@@ -506,32 +497,12 @@ namespace Seralyth.Menu
                         potatoTime = 0f;
                 }
 
-                if (adminTime != null && PhotonNetwork.InRoom)
-                {
-                    if (PhotonNetwork.PlayerListOthers.Any(player => ServerData.Administrators.ContainsKey(player.UserId) && !Console.excludedCones.Contains(player)))
-                    {
-                        adminTime += Time.unscaledDeltaTime;
-                        if (adminTime > 10f)
-                        {
-                            adminTime = null;
-                            AchievementManager.UnlockAchievement(new AchievementManager.Achievement
-                            {
-                                name = "EEEEKK!",
-                                description = "Be in the same room as a Console administrator.",
-                                icon = "Images/Achievements/eeeekk.png"
-                            });
-                        }
-                    }
-                    else
-                        adminTime = 0f;
-                }
-
                 if (watermarkImage != null)
                     watermarkImage.GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0f, 90f, 90f - (rockWatermark ? (Mathf.Sin(Time.time * 2f) * 10f) : 0f)));
 
                 if (animatedTitle && title != null)
                 {
-                    string targetString = doCustomName ? NoRichtextTags(customMenuName) : "Seralyth Menu";
+                    string targetString = doCustomName ? NoRichtextTags(customMenuName) : "Axiom Menu";
                     int length = (int)Mathf.PingPong(Time.time / 0.25f, targetString.Length + 1);
                     title.text = length > 0 ? targetString[..length] : "";
                 }
@@ -2618,7 +2589,7 @@ namespace Seralyth.Menu
                     }
                 }.AddComponent<TextMeshPro>();
                 title.font = activeFont;
-                title.text = translate ? "Seralyth" : "<b>Seralyth</b>";
+                title.text = translate ? "Axiom.cs" : "<b>Axiom.cs</b>";
 
                 if (doCustomName)
                     title.text = customMenuName;
@@ -2661,7 +2632,7 @@ namespace Seralyth.Menu
 
                 if (animatedTitle)
                 {
-                    string targetString = doCustomName ? NoRichtextTags(customMenuName) : "Seralyth Menu";
+                    string targetString = doCustomName ? NoRichtextTags(customMenuName) : "Axiom Menu";
                     int length = (int)Mathf.PingPong(Time.time / 0.25f, targetString.Length);
                     title.text = length > 0 ? targetString[..length] : "";
                 }
@@ -2688,6 +2659,33 @@ namespace Seralyth.Menu
 
                 FollowMenuSettings(title);
             }
+
+            //Adding Slogan
+            sloganText = new GameObject
+            {
+                transform =
+                {
+                    parent = canvasObj.transform
+                }
+            }.AddComponent<TextMeshPro>();
+            sloganText.font = activeFont;
+            sloganText.text = "<b>" + FollowMenuSettings("Entertain, Not Grief.") + "</b>";
+
+            sloganText.fontSize = 1;
+            sloganText.AddComponent<UIColorChanger>().colors = textColors[0];
+
+            sloganText.richText = true;
+            sloganText.fontStyle = activeFontStyle;
+            sloganText.alignment = TextAlignmentOptions.Center;
+            sloganText.enableAutoSizing = true;
+            sloganText.fontSizeMin = 0;
+            RectTransform sloganRect = sloganText.GetComponent<RectTransform>();
+            sloganRect.localPosition = Vector3.zero;
+            sloganRect.sizeDelta = new Vector2(0.28f, 0.0165f);
+
+            sloganRect.localPosition = new Vector3(0.06f, 0.084f, 0.135f);
+            sloganRect.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+
 
             if (!backgroundColor.transparent)
             {
@@ -6235,7 +6233,6 @@ namespace Seralyth.Menu
                                         {
                                             if (fromMenu && !ignoreForce && ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer.UserId) && rightJoystickClick && PhotonNetwork.InRoom)
                                             {
-                                                Console.ExecuteCommand("forceenable", ReceiverGroup.Others, target.buttonText, target.enabled);
                                                 NotificationManager.SendNotification("<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> Force enabled mod for other menu users.");
                                                 VRRig.LocalRig.PlayHandTapLocal(50, rightHand, 0.4f);
                                             }
@@ -6475,9 +6472,6 @@ namespace Seralyth.Menu
             NetworkSystem.Instance.OnPlayerJoined -= OnPlayerJoin;
             NetworkSystem.Instance.OnPlayerLeft -= OnPlayerLeave;
 
-            if (Console.instance != null)
-                Destroy(Console.instance.gameObject);
-
             if (NotificationManager.Instance != null)
             {
                 Destroy(NotificationManager.Instance.canvas);
@@ -6639,7 +6633,7 @@ jgs \_   _/ |Oo\
         public static bool smallCapsText;
         public static bool innerOutline;
         public static bool smoothLines;
-        public static bool shouldRound;
+        public static bool shouldRound = true;
         public static bool isMouseDown;
         public static bool openedwithright;
         public static bool oneHand;
@@ -6916,7 +6910,7 @@ jgs \_   _/ |Oo\
 #if LEGAL
             "<b>Seralyth</b> Legal";
 #else
-            "<b>Seralyth</b> Menu";
+            "<b>Axiom</b> Menu";
 #endif
         public static bool doCustomMenuBackground;
         public static bool menuTrail;
@@ -7016,7 +7010,6 @@ jgs \_   _/ |Oo\
         private static float fpsAvgTime;
         private static float fpsAverageNumber;
         private static float? potatoTime = 0f;
-        private static float? adminTime = 0f;
         public static bool fpsCountTimed;
         public static bool fpsCountAverage;
         public static bool ftCount;
@@ -7024,6 +7017,7 @@ jgs \_   _/ |Oo\
         public static float lastDeltaTime = 1f;
         public static TextMeshPro keyboardInputObject;
         public static TextMeshPro title;
+        public static TextMeshPro sloganText;
         public static VRRig GhostRig;
         public static GameObject legacyGhostViewLeft;
         public static GameObject legacyGhostViewRight;
@@ -7092,7 +7086,7 @@ jgs \_   _/ |Oo\
         public static readonly List<string> skipButtons = new List<string> { };
         public static bool translate;
 
-        public static string serverLink = "https://discord.gg/FXja6thKZC";
+        public static string serverLink = "https://discord.gg/gNqNT7upCh";
 
         public static int arrowType;
         public static readonly string[][] arrowTypes = {

@@ -171,8 +171,8 @@ namespace Seralyth.Managers
         public const int StumpLeaderboardIndex = 3;
         public const int ForestLeaderboardIndex = 6;
 
-        public static string motdTemplate = "You are using build {0}. This menu was created by Seralyth Software. " +
-        "This menu is completely free and open sourced, if you paid for this menu you have been scammed. " +
+        public static string motdTemplate = "You are using build {0}. This menu was forked from Seralyth Software. " +
+        "Trying to ghost troll? Wrong menu, skid! This fork is for fun, not ruining lobbies. Go use the original Seralyth. " +
         "There are a total of <b>{1}</b> mods on this menu. " +
         "<color=red>Seralyth is not responsible for any bans using this menu.</color> " +
         "If you get banned while using this, it's your responsibility.\n\nCurrent menu status: <b>Loading...</b>\nMade with <3 by the community.\n\n<alpha=128>{2} {0} {3}<alpha=255>";

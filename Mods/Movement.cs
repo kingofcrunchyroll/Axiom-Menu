@@ -815,7 +815,7 @@ namespace Seralyth.Mods
         {
             Rigidbody rb = GorillaTagger.Instance.rigidbody;
 
-            if (leftPrimary)
+            if (leftGrab)
             {
                 Vector3 leftForce = FlySpeed * -GorillaTagger.Instance.leftHandTransform.right;
                 rb.AddForce(leftForce * Time.deltaTime, ForceMode.VelocityChange);
@@ -824,7 +824,7 @@ namespace Seralyth.Mods
                 GorillaTagger.Instance.StartVibration(true, hapticStrength, GorillaTagger.Instance.tapHapticDuration);
             }
 
-            if (rightPrimary)
+            if (rightGrab)
             {
                 Vector3 rightForce = FlySpeed * GorillaTagger.Instance.rightHandTransform.right;
                 rb.AddForce(rightForce * Time.deltaTime, ForceMode.VelocityChange);
@@ -2975,6 +2975,7 @@ namespace Seralyth.Mods
         public static bool lastHit;
         public static bool lastHit2;
         public static bool lastRG;
+        static bool flag = false;
 
         public static void Invisible()
         {
@@ -2983,9 +2984,22 @@ namespace Seralyth.Mods
                 invisMonke = hit;
             if (invisMonke)
             {
+                if (!flag)
+                {
+                    flag = true; // basically a debounce so it doesn't spam the sound effect
+                    if (PhotonNetwork.InRoom)
+                    {
+                        GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 84, false, 999999f); //play the pop sound
+                        RPCProtection();
+                    }
+                    else
+                        VRRig.LocalRig.PlayHandTapLocal(84, false, 999999f);
+                }
                 VRRig.LocalRig.enabled = false;
                 VRRig.LocalRig.transform.position = GorillaTagger.Instance.bodyCollider.transform.position - Vector3.up * 99999f;
             }
+            else
+                flag = false; // just resets it
             if (hit && !lastHit2)
             {
                 invisMonke = !invisMonke;

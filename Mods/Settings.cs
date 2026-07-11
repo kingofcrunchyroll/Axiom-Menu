@@ -46,7 +46,6 @@ using UnityEngine.XR;
 using static Seralyth.Menu.Main;
 using static Seralyth.Utilities.AssetUtilities;
 using static Seralyth.Utilities.RigUtilities;
-using Console = Seralyth.Classes.Menu.Console;
 using Object = UnityEngine.Object;
 
 namespace Seralyth.Mods
@@ -512,6 +511,25 @@ namespace Seralyth.Mods
                     toolTip = "Returns you back to the players tab.",
                     legal = true
                 },
+                new ButtonInfo
+                {
+                    buttonText = "Mute Player",
+                    overlapText = IsPlayerMuted(playerRig) ? $"Unmute {targetName}" : $"Mute {targetName}",
+                    enableMethod =() => MutePlayer(playerRig, true),
+                    disableMethod =() => MutePlayer(playerRig, false),
+                    enabled = IsPlayerMuted(playerRig),
+                    toolTip = $"Makes it so that you can't hear {targetName}.",
+                    legal = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Report Player",
+                    overlapText = $"Report {targetName}",
+                    method =() => ReportPlayer(player),
+                    isTogglable = false,
+                    toolTip = $"Brings you to the report page for {targetName}.",
+                    legal = true
+                },
 
                 new ButtonInfo {
                     buttonText = "Spectate Player",
@@ -550,35 +568,10 @@ namespace Seralyth.Mods
                     toolTip = $"Follows {targetName}."
                 },
                 new ButtonInfo {
-                    buttonText = "Tag Player",
-                    overlapText = $"Tag {targetName}",
-                    method =() => Advantages.TagPlayer(player),
-                    disableMethod = Movement.EnableRig,
-                    toolTip = $"Tags {targetName}."
-                },
-                new ButtonInfo {
                     buttonText = "Snowball Fling Player",
                     overlapText = $"Snowball Fling {targetName}",
                     method =() => Overpowered.FlingPlayer(player),
                     toolTip = $"Flings {targetName} with snowballs."
-                },
-                new ButtonInfo {
-                    buttonText = "Projectile Blind Player",
-                    overlapText = $"Projectile Blind {targetName}",
-                    method =() => Projectiles.ProjectileBlindPlayer(player),
-                    toolTip = $"Blinds {targetName} using the egg projectiles."
-                },
-                new ButtonInfo {
-                    buttonText = "Projectile Lag Player",
-                    overlapText = $"Projectile Lag {targetName}",
-                    method =() => Projectiles.ProjectileLagPlayer(player),
-                    toolTip = $"Lags {targetName} using the firework projectiles."
-                },
-                new ButtonInfo {
-                    buttonText = "Lag Player",
-                    overlapText = $"Lag {targetName}",
-                    method =() => Overpowered.LagTarget(player),
-                    toolTip = $"Lags {targetName}."
                 },
                 new ButtonInfo {
                     buttonText = "Destroy Player",
@@ -598,24 +591,6 @@ namespace Seralyth.Mods
                     method =() => Overpowered.GuardianBringPlayerGun(player),
                     toolTip = $"Brings {targetName} to wherever your hand desires."
                 },
-                new ButtonInfo {
-                    buttonText = "Guardian Kick Player",
-                    overlapText = $"Guardian Kick {targetName}",
-                    method =() => Overpowered.GuardianKickTarget(player),
-                    toolTip = $"Kicks {targetName}."
-                },
-                new ButtonInfo {
-                    buttonText = "Guardian Obliterate Player",
-                    overlapText = $"Guardian Obliterate {targetName}",
-                    method =() => Overpowered.GuardianObliteratePlayer(player),
-                    toolTip = $"Obliterates {targetName}."
-                },
-                new ButtonInfo {
-                    buttonText = "Guardian Crash Player",
-                    overlapText = $"Guardian Crash {targetName}",
-                    method =() => Overpowered.GuardianCrashPlayer(player),
-                    toolTip = $"Crashes {targetName}."
-                }
             };
 
             if (PhotonNetwork.IsMasterClient)
@@ -635,39 +610,6 @@ namespace Seralyth.Mods
                             method =() => Overpowered.BetaSetStatus(RoomSystem.StatusEffects.TaggedTime, new RaiseEventOptions { TargetActors = new[] { player.ActorNumber } } ),
                             toolTip = $"Gives {targetName} tag freeze."
                         }
-                    }
-                );
-            }
-
-            if (ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
-            {
-                buttons.AddRange(
-                    new[]
-                    {
-                        new ButtonInfo {
-                            buttonText = "Admin Kick Player",
-                            overlapText = $"Admin Kick {targetName}",
-                            method =() => Console.ExecuteCommand("kick", ReceiverGroup.All, player.UserId),
-                            isTogglable = false,
-                            toolTip = $"Kicks {targetName} if they're using the menu.",
-                            legal = true
-                        },
-                        new ButtonInfo {
-                            buttonText = "Admin Bring Player",
-                            overlapText = $"Admin Bring {targetName}",
-                            method =() => Console.ExecuteCommand("tp", player.ActorNumber, GorillaTagger.Instance.headCollider.transform.position),
-                            isTogglable = false,
-                            toolTip = $"Brings {targetName} to you if they're using the menu.",
-                            legal = true
-                        },
-                        new ButtonInfo {
-                            buttonText = "Admin Crash Player",
-                            overlapText = $"Admin Crash {targetName}",
-                            method =() => Console.ExecuteCommand("crash", player.ActorNumber),
-                            isTogglable = false,
-                            toolTip = $"Crashes {targetName} if they're using the menu.",
-                            legal = true
-                        },
                     }
                 );
             }
@@ -743,6 +685,82 @@ namespace Seralyth.Mods
 
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
             Buttons.CurrentCategoryName = "Temporary Category";
+        }
+
+        public static void ReportPlayer(NetPlayer player)
+        {
+            var playerName = player.NickName;
+
+            List<ButtonInfo> buttons = new List<ButtonInfo>
+            {
+                new ButtonInfo {
+                    buttonText = "Cancel Report",
+                    method =() => NavigatePlayer(player),
+                    isTogglable = false,
+                    toolTip = "Returns you back to the player menu.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Report HateSpeech",
+                    overlapText = $"Report {playerName} for Hate Speech",
+                    method =() => {ReportPlayerFor(player, 0); NavigatePlayer(player); },
+                    isTogglable = false,
+                    toolTip = "Reports the player for Hate Speech.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Report Toxicity",
+                    overlapText = $"Report {playerName} for Toxicity",
+                    method =() => {ReportPlayerFor(player, 1); NavigatePlayer(player); },
+                    isTogglable = false,
+                    toolTip = "Reports the player for Toxicity.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Report Cheating",
+                    overlapText = $"Report {playerName} for Cheating",
+                    method =() => {ReportPlayerFor(player, 2); NavigatePlayer(player); },
+                    isTogglable = false,
+                    toolTip = "Reports the player for Cheating.",
+                    legal = true
+                }
+            };
+            Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
+            Buttons.CurrentCategoryName = "Temporary Category";
+        }
+
+        public static void ReportPlayerFor(NetPlayer player, int reason)
+        {
+            if (player == null) return;
+            GorillaPlayerLineButton.ButtonType reportReason = reason switch
+            {
+                0 => GorillaPlayerLineButton.ButtonType.HateSpeech,
+                1 => GorillaPlayerLineButton.ButtonType.Toxicity,
+                2 => GorillaPlayerLineButton.ButtonType.Cheating,
+                _ => GorillaPlayerLineButton.ButtonType.Cancel
+            };
+            if (reportReason == GorillaPlayerLineButton.ButtonType.Cancel)
+            {
+                NotificationManager.SendNotification("<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Invalid report reason.", 5000);
+                return;
+            }
+            GorillaPlayerScoreboardLine.ReportPlayer(player.UserId, reportReason, player.NickName);
+            VRRig playerRig = GetVRRigFromPlayer(player) ?? null;
+            if (playerRig && !playerRig.IsLocal())
+            {
+                foreach (var line in GorillaScoreboardTotalUpdater.allScoreboardLines.Where(line => line.linePlayer == GetPlayerFromVRRig(playerRig)))
+                {
+                    line.SetReportState(false, reportReason);
+                }
+            }
+            NotificationManager.SendNotification($"<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Reported {player.NickName} for <color=red>{reportReason}</color>.", 5000);
+        }
+
+        public static bool IsPlayerMuted(VRRig targetPlayer)
+        {
+            NetPlayer player = GetPlayerFromVRRig(targetPlayer);
+            if (player == null) return false;
+            return PlayerPrefs.GetInt(player.UserId, 0) != 0;
         }
 
         public static void SpectatePlayer(VRRig rig)
@@ -826,6 +844,18 @@ namespace Seralyth.Mods
                     Buttons.GetIndex(modName).customBind = null;
 
                 bind.Value.Clear();
+            }
+        }
+
+        public static void MutePlayer(VRRig targetPlayer, bool flag)
+        {
+            if (targetPlayer && !targetPlayer.IsLocal())
+            {
+                foreach (var line in GorillaScoreboardTotalUpdater.allScoreboardLines.Where(line => line.linePlayer == GetPlayerFromVRRig(targetPlayer)))
+                {
+                    line.muteButton.isOn = flag;
+                    line.PressButton(flag, GorillaPlayerLineButton.ButtonType.Mute);
+                }
             }
         }
 
@@ -1235,40 +1265,7 @@ exit 0";
                         }
                     };
                     break;
-                case 4: // Strobe
-                    backgroundColor = new ExtGradient
-                    {
-                        colors = ExtGradient.GetSimpleGradient(Color.white, Color.black)
-                    };
-                    menuBackgroundColor = backgroundColor;
-                    buttonColors = new[]
-                    {
-                        new ExtGradient // Released
-                        {
-                            colors = ExtGradient.GetSimpleGradient(Color.black, Color.white)
-                        },
-                        new ExtGradient // Pressed
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.white)
-                        }
-                    };
-                    textColors = new[]
-                    {
-                        new ExtGradient // Title
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.black)
-                        },
-                        new ExtGradient // Button Released
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.black)
-                        },
-                        new ExtGradient // Button Clicked
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.black)
-                        }
-                    };
-                    break;
-                case 5: // Kman
+                case 4: // Kman
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(110, 0, 0, 255))
@@ -1301,7 +1298,7 @@ exit 0";
                         }
                     };
                     break;
-                case 6: // Rainbow
+                case 5: // Rainbow
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black),
@@ -1336,7 +1333,7 @@ exit 0";
                         }
                     };
                     break;
-                case 7: // Player Material
+                case 6: // Player Material
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black),
@@ -1371,7 +1368,7 @@ exit 0";
                         }
                     };
                     break;
-                case 8: // Lava
+                case 7: // Lava
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(255, 111, 0, 255))
@@ -1404,7 +1401,7 @@ exit 0";
                         }
                     };
                     break;
-                case 9: // Rock
+                case 8: // Rock
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, Color.red)
@@ -1437,7 +1434,7 @@ exit 0";
                         }
                     };
                     break;
-                case 10: // Ice
+                case 9: // Ice
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(0, 174, 255, 255))
@@ -1470,7 +1467,7 @@ exit 0";
                         }
                     };
                     break;
-                case 11: // Water
+                case 10: // Water
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(0, 136, 255, 255), new Color32(0, 174, 255, 255))
@@ -1503,7 +1500,7 @@ exit 0";
                         }
                     };
                     break;
-                case 12: // Minty
+                case 11: // Minty
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(0, 255, 246, 255), new Color32(0, 255, 144, 255))
@@ -1536,7 +1533,7 @@ exit 0";
                         }
                     };
                     break;
-                case 13: // Pink
+                case 12: // Pink
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(255, 130, 255, 255), Color.white)
@@ -1569,7 +1566,7 @@ exit 0";
                         }
                     };
                     break;
-                case 14: // Purple
+                case 13: // Purple
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(122, 35, 159, 255), new Color32(60, 26, 89, 255))
@@ -1602,7 +1599,7 @@ exit 0";
                         }
                     };
                     break;
-                case 15: // Magenta Cyan
+                case 14: // Magenta Cyan
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.magenta, Color.cyan)
@@ -1635,7 +1632,7 @@ exit 0";
                         }
                     };
                     break;
-                case 16: // Red Fade
+                case 15: // Red Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.red, Color.black)
@@ -1668,7 +1665,7 @@ exit 0";
                         }
                     };
                     break;
-                case 17: // Orange Fade
+                case 16: // Orange Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(255, 128, 0, 255), Color.black)
@@ -1701,7 +1698,7 @@ exit 0";
                         }
                     };
                     break;
-                case 18: // Yellow Fade
+                case 17: // Yellow Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.yellow, Color.black)
@@ -1734,7 +1731,7 @@ exit 0";
                         }
                     };
                     break;
-                case 19: // Green Fade
+                case 18: // Green Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.green, Color.black)
@@ -1767,7 +1764,7 @@ exit 0";
                         }
                     };
                     break;
-                case 20: // Blue Fade
+                case 19: // Blue Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.blue, Color.black)
@@ -1800,7 +1797,7 @@ exit 0";
                         }
                     };
                     break;
-                case 21: // Purple Fade
+                case 20: // Purple Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(119, 0, 255, 255), Color.black)
@@ -1833,7 +1830,7 @@ exit 0";
                         }
                     };
                     break;
-                case 22: // Magenta Fade
+                case 21: // Magenta Fade
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.magenta, Color.black)
@@ -1866,7 +1863,7 @@ exit 0";
                         }
                     };
                     break;
-                case 23: // Banana
+                case 22: // Banana
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(255, 255, 130, 255), Color.white)
@@ -1899,7 +1896,7 @@ exit 0";
                         }
                     };
                     break;
-                case 24: // Pride
+                case 25: // Pride
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.red, Color.green)
@@ -1932,7 +1929,7 @@ exit 0";
                         }
                     };
                     break;
-                case 25: // Trans
+                case 26: // Trans
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(245, 169, 184, 255), new Color32(91, 206, 250, 255))
@@ -1965,7 +1962,7 @@ exit 0";
                         }
                     };
                     break;
-                case 26: // MLM or Gay
+                case 27: // MLM or Gay
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(7, 141, 112, 255), new Color32(61, 26, 220, 255))
@@ -1998,7 +1995,7 @@ exit 0";
                         }
                     };
                     break;
-                case 27: // Steal (old)
+                case 28: // Steal (old)
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(50, 50, 50, 255))
@@ -2031,7 +2028,7 @@ exit 0";
                         }
                     };
                     break;
-                case 28: // Silence
+                case 29: // Silence
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(80, 0, 80, 255))
@@ -2064,7 +2061,7 @@ exit 0";
                         }
                     };
                     break;
-                case 29: // Transparent
+                case 30: // Transparent
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black),
@@ -2100,7 +2097,7 @@ exit 0";
                         }
                     };
                     break;
-                case 30: // King
+                case 31: // King
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(100, 60, 170, 255))
@@ -2133,7 +2130,7 @@ exit 0";
                         }
                     };
                     break;
-                case 31: // Scoreboard
+                case 32: // Scoreboard
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(0, 59, 4, 255))
@@ -2166,7 +2163,7 @@ exit 0";
                         }
                     };
                     break;
-                case 32: // Scoreboard (banned)
+                case 33: // Scoreboard (banned)
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(225, 73, 43, 255))
@@ -2199,7 +2196,7 @@ exit 0";
                         }
                     };
                     break;
-                case 33: // Rift
+                case 34: // Rift
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(25, 25, 25, 255))
@@ -2232,7 +2229,7 @@ exit 0";
                         }
                     };
                     break;
-                case 34: // Blurple Dark
+                case 35: // Blurple Dark
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(26, 26, 61, 255))
@@ -2265,7 +2262,7 @@ exit 0";
                         }
                     };
                     break;
-                case 35: // ShibaGT Gold
+                case 36: // ShibaGT Gold
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, Color.gray)
@@ -2298,7 +2295,7 @@ exit 0";
                         }
                     };
                     break;
-                case 36: // ShibaGT Genesis
+                case 37: // ShibaGT Genesis
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black)
@@ -2331,7 +2328,7 @@ exit 0";
                         }
                     };
                     break;
-                case 37: // wyvern
+                case 38: // wyvern
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(new Color32(199, 115, 173, 255), new Color32(165, 233, 185, 255))
@@ -2364,7 +2361,7 @@ exit 0";
                         }
                     };
                     break;
-                case 38: // Steal (new)
+                case 39: // Steal (new)
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(27, 27, 27, 255))
@@ -2397,7 +2394,7 @@ exit 0";
                         }
                     };
                     break;
-                case 39: // USA Menu (lol)
+                case 40: // USA Menu (lol)
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(100, 25, 125, 255))
@@ -2430,7 +2427,7 @@ exit 0";
                         }
                     };
                     break;
-                case 40: // Watch
+                case 41: // Watch
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(27, 27, 27, 255))
@@ -2463,7 +2460,7 @@ exit 0";
                         }
                     };
                     break;
-                case 41: // AZ Menu
+                case 42: // AZ Menu
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSimpleGradient(Color.black, new Color32(100, 0, 0, 255))
@@ -2496,7 +2493,7 @@ exit 0";
                         }
                     };
                     break;
-                case 42: // ImGUI
+                case 43: // ImGUI
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(21, 22, 23, 255))
@@ -2529,7 +2526,7 @@ exit 0";
                         }
                     };
                     break;
-                case 43: // Clean Dark
+                case 44: // Clean Dark
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black)
@@ -2562,7 +2559,7 @@ exit 0";
                         }
                     };
                     break;
-                case 44: // Discord Light Mode (lmfao)
+                case 45: // Discord Light Mode (lmfao)
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.white)
@@ -2595,7 +2592,7 @@ exit 0";
                         }
                     };
                     break;
-                case 45: // The Hub
+                case 46: // The Hub
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(Color.black)
@@ -2621,41 +2618,6 @@ exit 0";
                         new ExtGradient // Button Released
                         {
                             colors = ExtGradient.GetSolidGradient(Color.black)
-                        },
-                        new ExtGradient // Button Clicked
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.white)
-                        }
-                    };
-                    break;
-                case 46: // EPILEPTIC
-                    backgroundColor = new ExtGradient
-                    {
-                        colors = ExtGradient.GetSolidGradient(Color.black),
-                        epileptic = true
-                    };
-                    menuBackgroundColor = backgroundColor;
-                    buttonColors = new[]
-                    {
-                        new ExtGradient // Released
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.black)
-                        },
-                        new ExtGradient // Pressed
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.black),
-                            epileptic = true
-                        }
-                    };
-                    textColors = new[]
-                    {
-                        new ExtGradient // Title
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.white)
-                        },
-                        new ExtGradient // Button Released
-                        {
-                            colors = ExtGradient.GetSolidGradient(Color.white)
                         },
                         new ExtGradient // Button Clicked
                         {
@@ -4879,7 +4841,7 @@ exit 0";
         // Thanks to kingofnetflix for inspiration and support with voice recognition
         private static KeywordRecognizer mainPhrases;
         private static KeywordRecognizer modPhrases;
-        private static string[] keyWords = { "jarvis", "seralyth", "seralith", "sarolith", "siri", "google", "alexa", "dummy", "computer", "stinky", "silly", "stupid", "console", "go go gadget", "monika", "wikipedia", "gideon", "a i", "ai", "a.i", "chat gpt", "chatgpt", "grok", "grock", "groq", "garmin" };
+        private static string[] keyWords = { "jarvis", "seralyth", "seralith", "sarolith", "siri", "google", "alexa", "dummy", "computer", "stinky", "silly", "stupid", "console", "go go gadget", "monika", "wikipedia", "gideon", "a i", "ai", "a.i", "chat gpt", "chatgpt", "grok", "grock", "groq", "garmin", "axiom" };
         private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "i hate you", "die" };
         public static void VoiceRecognitionOn()
         {
@@ -5301,15 +5263,11 @@ exit 0";
                 "Important Mods",
                 "Safety Mods",
                 "Movement Mods",
-                "Advantage Mods",
                 "Visual Mods",
                 "Fun Mods",
                 "Sound Mods",
                 "Projectile Mods",
                 "Master Mods",
-                "Overpowered Mods",
-                "Experimental Mods",
-                "Detected Mods",
                 "Achievements",
                 "Credits"
             };
@@ -6040,7 +5998,6 @@ exit 0";
                 Movement.timerPowerIndex.ToString(),
                 Projectiles.shootCycle.ToString(),
                 pointerIndex.ToString(),
-                Advantages.tagAuraIndex.ToString(),
                 notificationDecayTime.ToString(),
                 fontStyleType.ToString(),
                 arrowType.ToString(),
@@ -6050,7 +6007,6 @@ exit 0";
                 SoundManager.DefaultSounds["Button"],
                 buttonClickVolume.ToString(),
                 Safety.antiReportRangeIndex.ToString(),
-                Advantages.tagRangeIndex.ToString(),
                 Sound.BindMode.ToString(),
                 Movement.driveInt.ToString(),
                 langInd.ToString(),
@@ -6071,7 +6027,7 @@ exit 0";
                 Overpowered.snowballScale.ToString(),
                 Overpowered.lagIndex.ToString(),
                 Fun.blockDebounceIndex.ToString(),
-                Fun.nameCycleIndex.ToString(),
+                Fun.cycleSpeedIndex.ToString(),
                 menuScaleIndex.ToString(),
                 Sound.soundId.ToString(),
                 Fun.targetQuestScore.ToString(),
@@ -6158,6 +6114,12 @@ exit 0";
         public static void SavePreferences() =>
             File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt", SavePreferencesToText());
 
+        private static void TryLoad(Action load, string fieldName)
+        {
+            try { load(); }
+            catch (Exception e) { LogManager.Log($"Failed to load setting '{fieldName}': {e.Message}"); }
+        }
+
         public static int loadingPreferencesFrame;
         public static void LoadPreferencesFromText(string text)
         {
@@ -6178,221 +6140,91 @@ exit 0";
             try
             {
                 string[] data = textData[2].Split(";;");
-                Movement.platformMode = int.Parse(data[0]) - 1;
-                Movement.ChangePlatformType();
 
-                Movement.platformShape = int.Parse(data[1]) - 1;
-                Movement.ChangePlatformShape();
+                TryLoad(() => { Movement.platformMode = int.Parse(data[0]) - 1; Movement.ChangePlatformType(); }, "platformMode");
+                TryLoad(() => { Movement.platformShape = int.Parse(data[1]) - 1; Movement.ChangePlatformShape(); }, "platformShape");
+                TryLoad(() => { Movement.flySpeedCycle = int.Parse(data[2]) - 1; Movement.ChangeFlySpeed(); }, "flySpeedCycle");
+                TryLoad(() => { Movement.longarmCycle = int.Parse(data[3]) - 1; Movement.ChangeArmLength(); }, "longarmCycle");
+                TryLoad(() => { Movement.speedboostCycle = int.Parse(data[4]) - 1; Movement.ChangeSpeedBoostAmount(); }, "speedboostCycle");
+                TryLoad(() => { Projectiles.projMode = int.Parse(data[5]) - 1; Projectiles.ChangeProjectile(); }, "projMode");
+                TryLoad(() => { Movement.timerPowerIndex = int.Parse(data[6]) - 1; Movement.ChangeTimerSpeed(); }, "timerPowerIndex");
+                TryLoad(() => { Projectiles.shootCycle = int.Parse(data[7]) - 1; Projectiles.ChangeShootSpeed(); }, "shootCycle");
+                TryLoad(() => { pointerIndex = int.Parse(data[8]) - 1; ChangePointerPosition(); }, "pointerIndex");
+                TryLoad(() => { notificationDecayTime = int.Parse(data[9]) - 1000; ChangeNotificationTime(); }, "notificationDecayTime");
+                TryLoad(() => { fontStyleType = int.Parse(data[10]) - 1; ChangeFontStyleType(); }, "fontStyleType");
+                TryLoad(() => { arrowType = int.Parse(data[11]) - 1; ChangeArrowType(); }, "arrowType");
+                TryLoad(() => { pcbg = int.Parse(data[12]) - 1; ChangePCUI(); }, "pcbg");
+                TryLoad(() => { Important.reconnectDelay = int.Parse(data[13]) - 1; ChangeReconnectTime(); }, "reconnectDelay");
+                TryLoad(() => { Safety.fpsSpoofValue = string.IsNullOrWhiteSpace(data[14]) ? 85 : int.Parse(data[14]) - 5; Safety.ChangeFPSSpoofValue(); }, "fpsSpoofValue");
+                TryLoad(() =>
+                {
+                    SoundManager.DefaultSounds["Button"] = data[15];
+                    Buttons.GetIndex("Change Button Sound").overlapText = $"Change Button Sound <color=grey>[</color><color=green>{SoundManager.DefaultSounds["Button"]}</color><color=grey>]</color>";
+                }, "DefaultSounds[Button]");
+                TryLoad(() => { buttonClickVolume = int.Parse(data[16]) - 1; ChangeButtonVolume(); }, "buttonClickVolume");
+                TryLoad(() => { Safety.antiReportRangeIndex = int.Parse(data[17]) - 1; Safety.ChangeAntiReportRange(); }, "antiReportRangeIndex");
+                TryLoad(() => { Sound.BindMode = int.Parse(data[18]) - 1; Sound.SoundBindings(); }, "BindMode");
+                TryLoad(() => { Movement.driveInt = int.Parse(data[19]) - 1; Movement.ChangeDriveSpeed(); }, "driveInt");
+                TryLoad(() => { langInd = int.Parse(data[20]) - 1; ChangeMenuLanguage(); }, "langInd");
+                TryLoad(() => { inputTextColorInt = int.Parse(data[21]) - 1; ChangeInputTextColor(); }, "inputTextColorInt");
+                TryLoad(() => { Movement.pullPowerInt = int.Parse(data[22]) - 1; Movement.ChangePullModPower(); }, "pullPowerInt");
+                TryLoad(() =>
+                {
+                    SoundManager.DefaultSounds["Notification"] = data[23];
+                    Buttons.GetIndex("Change Notification Sound").overlapText = $"Change Notification Sound <color=grey>[</color><color=green>{SoundManager.DefaultSounds["Notification"]}</color><color=grey>]</color>";
+                }, "DefaultSounds[Notification]");
+                TryLoad(() => { Visuals.PerformanceModeStepIndex = int.Parse(data[24]) - 1; Visuals.ChangePerformanceModeVisualStep(); }, "PerformanceModeStepIndex");
+                TryLoad(() => { gunVariation = int.Parse(data[25]) - 1; ChangeGunVariation(); }, "gunVariation");
+                TryLoad(() => { GunDirection = int.Parse(data[26]) - 1; ChangeGunDirection(); }, "GunDirection");
+                TryLoad(() => { narratorIndex = int.Parse(data[27]) - 1; ChangeNarrationVoice(); }, "narratorIndex");
+                TryLoad(() => { Movement.predInt = int.Parse(data[28]) - 1; Movement.ChangePredictionAmount(); }, "predInt");
+                TryLoad(() => { gunLineQualityIndex = int.Parse(data[29]) - 1; ChangeGunLineQuality(); }, "gunLineQualityIndex");
+                TryLoad(() => { Projectiles.projDebounceIndex = int.Parse(data[30]) - 1; Projectiles.ChangeProjectileDelay(); }, "projDebounceIndex");
+                TryLoad(() => { Projectiles.red = int.Parse(data[31]) - 1; Projectiles.IncreaseRed(); }, "Projectiles.red");
+                TryLoad(() => { Projectiles.green = int.Parse(data[32]) - 1; Projectiles.IncreaseGreen(); }, "Projectiles.green");
+                TryLoad(() => { Projectiles.blue = int.Parse(data[33]) - 1; Projectiles.IncreaseBlue(); }, "Projectiles.blue");
+                TryLoad(() => { Safety.rankIndex = int.Parse(data[34]) - 1; Safety.ChangeRankedTier(); }, "rankIndex");
+                TryLoad(() => { Overpowered.snowballScale = int.Parse(data[35]) - 1; Overpowered.ChangeSnowballScale(); }, "snowballScale");
+                TryLoad(() => { Overpowered.lagIndex = int.Parse(data[36]) - 1; Overpowered.ChangeLagPower(); }, "lagIndex");
+                TryLoad(() => { Fun.blockDebounceIndex = int.Parse(data[37]) - 1; Fun.ChangeBlockDelay(); }, "blockDebounceIndex");
+                TryLoad(() => { Fun.cycleSpeedIndex = int.Parse(data[38]) - 1; Fun.ChangeCycleDelay(); }, "cycleSpeedIndex");
+                TryLoad(() => { menuScaleIndex = int.Parse(data[39]) - 1; ChangeMenuScale(); }, "menuScaleIndex");
+                TryLoad(() => { Sound.soundId = int.Parse(data[40]) - 1; Sound.IncreaseSoundID(); }, "soundId");
+                TryLoad(() => { Fun.targetQuestScore = int.Parse(data[41]) - 1; Fun.ChangeCustomQuestScore(); }, "targetQuestScore");
+                TryLoad(() => { notificationScaleIndex = int.Parse(data[42]) - 1; ChangeNotificationScale(); }, "notificationScaleIndex");
+                TryLoad(() => { overlayScaleIndex = int.Parse(data[43]) - 1; ChangeOverlayScale(); }, "overlayScaleIndex");
+                TryLoad(() => { arraylistScaleIndex = int.Parse(data[44]) - 1; ChangeArraylistScale(); }, "arraylistScaleIndex");
+                TryLoad(() => { playTime = int.Parse(data[45]); }, "playTime");
+                TryLoad(() => { Important.oldId = data[46]; }, "oldId");
+                TryLoad(() => { _pageSize = int.Parse(data[47]) - 1; ChangePageSize(); }, "_pageSize");
+                TryLoad(() => { Overpowered.snowballMultiplicationFactor = int.Parse(data[48]) - 1; Overpowered.ChangeSnowballMultiplicationFactor(); }, "snowballMultiplicationFactor");
+                TryLoad(() => { menuButtonIndex = int.Parse(data[49]) - 1; ChangeMenuButton(); }, "menuButtonIndex");
+                TryLoad(() => { Safety.targetElo = int.Parse(data[50]) - 100; Safety.ChangeELOValue(); }, "targetElo");
+                TryLoad(() => { Safety.targetBadge = int.Parse(data[51]) - 1; Safety.ChangeBadgeTier(); }, "targetBadge");
+                TryLoad(() => { Movement.playspaceAbuseIndex = int.Parse(data[52]) - 1; Movement.ChangePlayspaceAbuseSpeed(); }, "playspaceAbuseIndex");
+                TryLoad(() => { Movement.wallWalkStrengthIndex = int.Parse(data[53]) - 1; Movement.ChangeWallWalkStrength(); }, "wallWalkStrengthIndex");
+                TryLoad(() => { Fun.headSpinIndex = int.Parse(data[54]) - 1; Fun.ChangeHeadSpinSpeed(); }, "headSpinIndex");
+                TryLoad(() => { Movement.macroPlaybackRangeIndex = int.Parse(data[55]) - 1; Movement.ChangeMacroPlaybackRange(); }, "macroPlaybackRangeIndex");
+                TryLoad(() => { joystickMenuPosition = int.Parse(data[56]) - 1; ChangeJoystickMenuPosition(); }, "joystickMenuPosition");
+                TryLoad(() => { Movement.multiplicationAmount = int.Parse(data[57]) - 1; Movement.MultiplicationAmount(); }, "multiplicationAmount");
+                TryLoad(() => { Fun.targetFOV = int.Parse(data[58]) - 5; Fun.ChangeTargetFOV(); }, "targetFOV");
+                TryLoad(() => { Projectiles.targetProjectileIndex = int.Parse(data[59]) - 1; Projectiles.ChangeProjectileIndex(); }, "targetProjectileIndex");
+                TryLoad(() => { Movement.fakeLagDelayIndex = int.Parse(data[60]) - 1; Movement.ChangeFakeLagStrength(); }, "fakeLagDelayIndex");
+                TryLoad(() => { Projectiles.snowballIndex = int.Parse(data[61]) - 1; Projectiles.ChangeGrowingProjectile(); }, "snowballIndex");
+                TryLoad(() => { characterDistance = int.Parse(data[62]) - 1; ChangeCharacterDistance(); }, "characterDistance");
+                TryLoad(() => { Overpowered.lagTypeIndex = int.Parse(data[63]) - 1; Overpowered.ChangeLagType(); }, "lagTypeIndex");
+                TryLoad(() => { Overpowered.masterVisualizationType = int.Parse(data[64]) - 1; Overpowered.MasterVisualizationType(); }, "masterVisualizationType");
+                TryLoad(() => { Movement.targetHz = int.Parse(data[65]) - 500; Movement.ChangeTinnitusHz(); }, "targetHz");
+                TryLoad(() => { Safety.pingSpoofValue = int.Parse(data[66]) - 100; Safety.ChangePingSpoofValue(); }, "pingSpoofValue");
+                TryLoad(() => { Fun.soundboardVolumeIndex = float.Parse(data[67]) - 1; Fun.ChangeSoundboardVolume(); }, "soundboardVolumeIndex");
+                TryLoad(() => { Fun.soundboardSpeedIndex = float.Parse(data[68]) - 1; Fun.ChangeSoundboardSpeed(); }, "soundboardSpeedIndex");
+                TryLoad(() =>
+                {
+                    SoundManager.DefaultSoundpack = data[69];
+                    Buttons.GetIndex("Change Menu Soundpack").overlapText = $"Change Menu Soundpack <color=grey>[</color><color=green>{SoundManager.DefaultSoundpack}</color><color=grey>]</color>";
+                }, "DefaultSoundpack");
+                TryLoad(() => { Sound.disableLocalSoundboard = bool.Parse(data[70]); }, "disableLocalSoundboard");
 
-                Movement.flySpeedCycle = int.Parse(data[2]) - 1;
-                Movement.ChangeFlySpeed();
-
-                Movement.longarmCycle = int.Parse(data[3]) - 1;
-                Movement.ChangeArmLength();
-
-                Movement.speedboostCycle = int.Parse(data[4]) - 1;
-                Movement.ChangeSpeedBoostAmount();
-
-                Projectiles.projMode = int.Parse(data[5]) - 1;
-                Projectiles.ChangeProjectile();
-
-                Movement.timerPowerIndex = int.Parse(data[6]) - 1;
-                Movement.ChangeTimerSpeed();
-
-                Projectiles.shootCycle = int.Parse(data[7]) - 1;
-                Projectiles.ChangeShootSpeed();
-
-                pointerIndex = int.Parse(data[8]) - 1;
-                ChangePointerPosition();
-
-                Advantages.tagAuraIndex = int.Parse(data[9]) - 1;
-                Advantages.ChangeTagAuraRange();
-
-                notificationDecayTime = int.Parse(data[10]) - 1000;
-                ChangeNotificationTime();
-
-                fontStyleType = int.Parse(data[11]) - 1;
-                ChangeFontStyleType();
-
-                arrowType = int.Parse(data[12]) - 1;
-                ChangeArrowType();
-
-                pcbg = int.Parse(data[13]) - 1;
-                ChangePCUI();
-
-                Important.reconnectDelay = int.Parse(data[14]) - 1;
-                ChangeReconnectTime();
-
-                Safety.fpsSpoofValue = string.IsNullOrWhiteSpace(data[15]) ? 85 : int.Parse(data[15]) - 5;
-                Safety.ChangeFPSSpoofValue();
-
-                SoundManager.DefaultSounds["Button"] = data[16];
-                Buttons.GetIndex("Change Button Sound").overlapText = $"Change Button Sound <color=grey>[</color><color=green>{SoundManager.DefaultSounds["Button"]}</color><color=grey>]</color>";
-
-                buttonClickVolume = int.Parse(data[17]) - 1;
-                ChangeButtonVolume();
-
-                Safety.antiReportRangeIndex = int.Parse(data[18]) - 1;
-                Safety.ChangeAntiReportRange();
-
-                Advantages.tagRangeIndex = int.Parse(data[19]) - 1;
-                Advantages.ChangeTagReachDistance();
-
-                Sound.BindMode = int.Parse(data[20]) - 1;
-                Sound.SoundBindings();
-
-                Movement.driveInt = int.Parse(data[21]) - 1;
-                Movement.ChangeDriveSpeed();
-
-                langInd = int.Parse(data[22]) - 1;
-                ChangeMenuLanguage();
-
-                inputTextColorInt = int.Parse(data[23]) - 1;
-                ChangeInputTextColor();
-
-                Movement.pullPowerInt = int.Parse(data[24]) - 1;
-                Movement.ChangePullModPower();
-
-                SoundManager.DefaultSounds["Notification"] = data[25];
-                Buttons.GetIndex("Change Notification Sound").overlapText = $"Change Notification Sound <color=grey>[</color><color=green>{SoundManager.DefaultSounds["Notification"]}</color><color=grey>]</color>";
-
-                Visuals.PerformanceModeStepIndex = int.Parse(data[26]) - 1;
-                Visuals.ChangePerformanceModeVisualStep();
-
-                gunVariation = int.Parse(data[27]) - 1;
-                ChangeGunVariation();
-
-                GunDirection = int.Parse(data[28]) - 1;
-                ChangeGunDirection();
-
-                narratorIndex = int.Parse(data[29]) - 1;
-                ChangeNarrationVoice();
-
-                Movement.predInt = int.Parse(data[30]) - 1;
-                Movement.ChangePredictionAmount();
-
-                gunLineQualityIndex = int.Parse(data[31]) - 1;
-                ChangeGunLineQuality();
-
-                Projectiles.projDebounceIndex = int.Parse(data[32]) - 1;
-                Projectiles.ChangeProjectileDelay();
-
-                Projectiles.red = int.Parse(data[33]) - 1;
-                Projectiles.IncreaseRed();
-
-                Projectiles.green = int.Parse(data[34]) - 1;
-                Projectiles.IncreaseGreen();
-
-                Projectiles.blue = int.Parse(data[35]) - 1;
-                Projectiles.IncreaseBlue();
-
-                Safety.rankIndex = int.Parse(data[36]) - 1;
-                Safety.ChangeRankedTier();
-
-                Overpowered.snowballScale = int.Parse(data[37]) - 1;
-                Overpowered.ChangeSnowballScale();
-
-                Overpowered.lagIndex = int.Parse(data[38]) - 1;
-                Overpowered.ChangeLagPower();
-
-                Fun.blockDebounceIndex = int.Parse(data[39]) - 1;
-                Fun.ChangeBlockDelay();
-
-                Fun.cycleSpeedIndex = int.Parse(data[40]) - 1;
-                Fun.ChangeCycleDelay();
-
-                menuScaleIndex = int.Parse(data[41]) - 1;
-                ChangeMenuScale();
-
-                Sound.soundId = int.Parse(data[42]) - 1;
-                Sound.IncreaseSoundID();
-
-                Fun.targetQuestScore = int.Parse(data[43]) - 1;
-                Fun.ChangeCustomQuestScore();
-
-                notificationScaleIndex = int.Parse(data[44]) - 1;
-                ChangeNotificationScale();
-
-                overlayScaleIndex = int.Parse(data[45]) - 1;
-                ChangeOverlayScale();
-
-                arraylistScaleIndex = int.Parse(data[46]) - 1;
-                ChangeArraylistScale();
-
-                playTime = int.Parse(data[47]);
-
-                Important.oldId = data[48];
-
-                _pageSize = int.Parse(data[49]) - 1;
-                ChangePageSize();
-
-                Overpowered.snowballMultiplicationFactor = int.Parse(data[50]) - 1;
-                Overpowered.ChangeSnowballMultiplicationFactor();
-
-                menuButtonIndex = int.Parse(data[51]) - 1;
-                ChangeMenuButton();
-
-                Safety.targetElo = int.Parse(data[52]) - 100;
-                Safety.ChangeELOValue();
-
-                Safety.targetBadge = int.Parse(data[53]) - 1;
-                Safety.ChangeBadgeTier();
-
-                Movement.playspaceAbuseIndex = int.Parse(data[54]) - 1;
-                Movement.ChangePlayspaceAbuseSpeed();
-
-                Movement.wallWalkStrengthIndex = int.Parse(data[55]) - 1;
-                Movement.ChangeWallWalkStrength();
-
-                Fun.headSpinIndex = int.Parse(data[56]) - 1;
-                Fun.ChangeHeadSpinSpeed();
-
-                Movement.macroPlaybackRangeIndex = int.Parse(data[57]) - 1;
-                Movement.ChangeMacroPlaybackRange();
-
-                joystickMenuPosition = int.Parse(data[58]) - 1;
-                ChangeJoystickMenuPosition();
-
-                Movement.multiplicationAmount = int.Parse(data[59]) - 1;
-                Movement.MultiplicationAmount();
-
-                Fun.targetFOV = int.Parse(data[60]) - 5;
-                Fun.ChangeTargetFOV();
-
-                Projectiles.targetProjectileIndex = int.Parse(data[61]) - 1;
-                Projectiles.ChangeProjectileIndex();
-
-                Movement.fakeLagDelayIndex = int.Parse(data[62]) - 1;
-                Movement.ChangeFakeLagStrength();
-
-                Projectiles.snowballIndex = int.Parse(data[63]) - 1;
-                Projectiles.ChangeGrowingProjectile();
-
-                characterDistance = int.Parse(data[64]) - 1;
-                ChangeCharacterDistance();
-
-                Overpowered.lagTypeIndex = int.Parse(data[65]) - 1;
-                Overpowered.ChangeLagType();
-
-                Overpowered.masterVisualizationType = int.Parse(data[66]) - 1;
-                Overpowered.MasterVisualizationType();
-
-                Movement.targetHz = int.Parse(data[67]) - 500;
-                Movement.ChangeTinnitusHz();
-
-                Safety.pingSpoofValue = int.Parse(data[68]) - 100;
-                Safety.ChangePingSpoofValue();
-
-                Fun.soundboardVolumeIndex = float.Parse(data[69]) - 1;
-                Fun.ChangeSoundboardVolume();
-
-                Fun.soundboardSpeedIndex = float.Parse(data[70]) - 1;
-                Fun.ChangeSoundboardSpeed();
-
-                SoundManager.DefaultSoundpack = data[71];
-                Buttons.GetIndex("Change Menu Soundpack").overlapText = $"Change Menu Soundpack <color=grey>[</color><color=green>{SoundManager.DefaultSoundpack}</color><color=grey>]</color>";
-
-                Sound.disableLocalSoundboard = bool.Parse(data[72]);
             }
             catch { LogManager.Log("Save file out of date"); }
 

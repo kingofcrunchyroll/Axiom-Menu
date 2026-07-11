@@ -61,7 +61,7 @@ namespace Seralyth.Managers
             pObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             Destroy(pObj.GetComponent<Rigidbody>());
             Destroy(pObj.GetComponent<SphereCollider>());
-            pObj.transform.localScale = (Vector3.one * .3f) / 2;
+            pObj.transform.localScale = (Vector3.one * .15f) / 4;
             Renderer pR = pObj.GetComponent<Renderer>();
             pR.material.shader = Shader.Find("GUI/Text Shader");
             pR.material.color = Default;

@@ -408,7 +408,7 @@ exit";
                     Assets = new Managers.DiscordRPC.Assets
                     {
                         LargeImageKey = "cone",
-                        LargeImageText = "Seralyth Menu",
+                        LargeImageText = "Axiom Menu",
                         SmallImageKey = inRoom ? "online" : "offline",
                         SmallImageText = inRoom ? "Online" : "Offline"
                     },

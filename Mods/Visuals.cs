@@ -3605,7 +3605,7 @@ namespace Seralyth.Mods
                     indicator.GetComponent<Renderer>().material.mainTexture = texture;
 
                     indicator.transform.localScale = new Vector3(0.5f, 0.5f, 0.01f) * vrrig.scaleFactor;
-                    indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.Console.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
+                    indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
                     indicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
                 }
                 else if (currentCosmetic == null && cosmeticIndicators.TryGetValue(vrrig, out GameObject staleIndicator))
@@ -3676,7 +3676,7 @@ namespace Seralyth.Mods
                 indicator.GetComponent<Renderer>().material.color = vrrig.GetColor();
 
                 indicator.transform.localScale = new Vector3(0.5f, 0.5f, 0.01f) * vrrig.scaleFactor;
-                indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.Console.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
+                indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
                 indicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
             }
         }
@@ -3710,7 +3710,7 @@ namespace Seralyth.Mods
                 indicator.GetComponent<Renderer>().material.color = vrrig.GetColor();
 
                 indicator.transform.localScale = new Vector3(0.5f, 0.5f, 0.01f) * vrrig.scaleFactor;
-                indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.Console.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
+                indicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
                 indicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
             }
         }
@@ -3776,7 +3776,7 @@ namespace Seralyth.Mods
 
                         volIndicator.GetComponent<Renderer>().material.color = vrrig.GetColor();
                         volIndicator.transform.localScale = new Vector3(size, size, 0.01f) * vrrig.scaleFactor;
-                        volIndicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.Console.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
+                        volIndicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
                         volIndicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
                     }
                     else
@@ -3830,7 +3830,7 @@ namespace Seralyth.Mods
 
                         volIndicator.GetComponent<Renderer>().material.color = vrrig.GetColor();
                         volIndicator.transform.localScale = new Vector3(size, size, 0.01f) * vrrig.scaleFactor;
-                        volIndicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.Console.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
+                        volIndicator.transform.position = vrrig.headMesh.transform.position + vrrig.headMesh.transform.up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(vrrig) * vrrig.scaleFactor);
                         volIndicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
                     }
                     else
@@ -6376,26 +6376,6 @@ namespace Seralyth.Mods
 
             if (destroy || isLineRenderQueued)
                 linePool.Clear();
-        }
-
-        public static void ConsoleBeacon(string id, string version, string menuName)
-        {
-            NetPlayer sender = GetPlayerFromID(id);
-            VRRig vrrig = GetVRRigFromPlayer(sender);
-
-            Color userColor = Color.red;
-
-            NotificationManager.SendNotification("<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> " + sender.NickName + " is using " + menuName + " version " + version + ".", 3000);
-            VRRig.LocalRig.PlayHandTapLocal(29, false, 99999f);
-            VRRig.LocalRig.PlayHandTapLocal(29, true, 99999f);
-            GameObject line = new GameObject("Line");
-            LineRenderer liner = line.AddComponent<LineRenderer>();
-            liner.startColor = userColor; liner.endColor = userColor; liner.startWidth = 0.25f; liner.endWidth = 0.25f; liner.positionCount = 2; liner.useWorldSpace = true;
-
-            liner.SetPosition(0, vrrig.transform.position + new Vector3(0f, 9999f, 0f));
-            liner.SetPosition(1, vrrig.transform.position - new Vector3(0f, 9999f, 0f));
-            liner.material.shader = Shader.Find("GUI/Text Shader");
-            Object.Destroy(line, 3f);
         }
     }
 }

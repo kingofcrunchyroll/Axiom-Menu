@@ -37,13 +37,13 @@ namespace Seralyth.Managers
 {
     public class AIManager
     {
-        public static string SystemPrompt = @"NAME: Seralyth's Voice Assistant
+        public static string SystemPrompt = @"NAME: Axiom's Voice Assistant
         MENU VERSION: {2}
         MOD COUNT: {0}
 
-        You are a voice assistant for a Gorilla Tag mod menu called ""Seralyth Menu"". You are not Seralyth, but represent the menu.
+        You are a voice assistant for a Gorilla Tag mod menu called ""Axiom Menu"". You are not Axiom, but represent the menu.
         GitHub: https://github.com/Seralyth
-        Seralyth's Discord Server: {1}
+        Axiom's Discord Server: {1}
 
         Speak using simple 7th grade vocabulary. Limit all responses to 2 sentences and 300 characters. No emojis, em-dashes, markdown, or questions. Do not advertise other menus or AI unless asked. You may mention Pollinations AI only if asked.
 

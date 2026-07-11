@@ -23,19 +23,19 @@ namespace Seralyth
 {
     public class PluginInfo
     {
-        public const string GUID = "org.seralyth.gorillatag.seralythmenu";
-        public const string Name = "Seralyth Menu";
-        public const string Description = "Community powered mod menu for Gorilla Tag.";
-        public const string BuildTimestamp = "2026-06-01T23:16:25Z";
-        public const string Version = "4.8.5";
+        public const string GUID = "org.fluxed.gorillatag.axiommenu";
+        public const string Name = "Axiom Menu";
+        public const string Description = "The 'More Legal' Seralyth";
+        public const string BuildTimestamp = "2026-07-08T15:58:08Z";
+        public const string Version = "1.1.2";
 
         public const string BaseDirectory =
 #if LEGAL || LEGAL_DEBUG
             "SeralythMenu/Legal";
 #else
-            "SeralythMenu";
+            "AxiomMenu";
 #endif
-        public const string ClientResourcePath = "SeralythMenu.Resources.Client";
+        public const string ClientResourcePath = "AxiomMenu.Resources.Client";
         public const string ServerResourcePath = "https://raw.githubusercontent.com/Seralyth/Seralyth-Menu/master/Resources/Server";
         public const string ServerAPI = "https://menu.seralyth.software";
         public const string Logo = @"
@@ -53,25 +53,25 @@ namespace Seralyth
                  %%%%  %%   %##           ######%         ##%         %###%                         
                            %#%             ######        ###            ###%                        
                          %##%              %######%    #####              ###%                      
-#%   %##                  #######%                        ###                    
-                   %% %##                     %#######%                        ###%                 
-###                        %########%                       ###%               
-###                            %#######%                       %##%             
+                      #%   %##                  #######%                        ###                    
+                     %% %##                     %#######%                        ###%                 
+                    ###                        %########%                       ###%               
+                   ###                            %#######%                       %##%             
                   %##                                %#######%                        ###           
                 %##%                                   %#######%                     ###%           
-###                   %##########%        #######%                   ###             
-##%                  %####%    %####        %######%                ###               
-###                  %###%        %##%         %######%              ###                
-###                 ###%          %%%           %######%            ##%                 
-###              %###                          #######          ####                  
-                %###           ####                          #######        %###                    
-####         ####                          #######       ###   ##                 
-                    %###       ####                         %######       ##%    ##%                
-###      ###                         ######      ###                         
+                ###                   %##########%        #######%                   ###             
+                ##%                  %####%    %####        %######%                ###               
+                ###                  %###%        %##%         %######%              ###                
+                ###                 ###%          %%%           %######%            ##%                 
+                 ###              %###                          #######          ####                  
+                  %###           ####                          #######        %###                    
+                    ####         ####                          #######       ###   ##                 
+                      %###       ####                         %######       ##%    ##%                
+                        ###      ###                         ######      ###                         
                          %###   ####                       ######      ###        %%%               
-####  %####                   %######     ###           #%               
+                          ####  %####                   %######     ###           #%               
                             %%###% ####%              ########      ##%         %%%                 
-###%%######%%    %#########%      ###     %%%% %%%%                 
+                            ###%%######%%    %#########%      ###     %%%% %%%%                 
                              %#   %### %###############%         ##%%%%% %%%%                       
                               %%    %##%                       %##  %                               
                                        %##                    %#%                                   

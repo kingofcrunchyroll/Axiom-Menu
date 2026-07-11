@@ -561,7 +561,7 @@ namespace Seralyth.Mods
                 }
 
                 AudioSource ausrc = soundboardAudioManager.GetComponent<AudioSource>();
-                ausrc.volume = 1f;
+                ausrc.volume = 0.6f;
                 ausrc.clip = sound;
                 ausrc.loop = false;
                 ausrc.Play();

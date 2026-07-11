@@ -164,7 +164,7 @@ namespace Seralyth.Managers
                     iconPool.Add(playerRig, playerIndicator);
                 }
 
-                float distance = Classes.Menu.Console.GetIndicatorDistance(playerRig);
+                float distance = Classes.Menu.ConsoleStub.GetIndicatorDistance(playerRig);
                 playerIndicator.transform.localScale = new Vector3(0.4f, 0.4f, 0.01f) * playerRig.scaleFactor;
                 playerIndicator.transform.position = Visuals.GetNameTagTransform(playerRig).position + Visuals.GetNameTagTransform(playerRig).up * (distance * playerRig.scaleFactor);
                 playerIndicator.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);

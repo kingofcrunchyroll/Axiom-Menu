@@ -207,7 +207,7 @@ namespace Seralyth.Managers
                     playerStar.GetComponent<Renderer>().material.color = playerRig.playerColor;
 
                     playerStar.transform.localScale = new Vector3(0.4f, 0.4f, 0.01f) * playerRig.scaleFactor;
-                    playerStar.transform.position = Visuals.GetNameTagTransform(playerRig).position + Visuals.GetNameTagTransform(playerRig).up * (Classes.Menu.Console.GetIndicatorDistance(playerRig) * playerRig.scaleFactor);
+                    playerStar.transform.position = Visuals.GetNameTagTransform(playerRig).position + Visuals.GetNameTagTransform(playerRig).up * (Classes.Menu.ConsoleStub.GetIndicatorDistance(playerRig) * playerRig.scaleFactor);
                     playerStar.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
                 }
 
@@ -543,8 +543,8 @@ namespace Seralyth.Managers
                                 if (!PlatformNetworking)
                                     break;
 
-                                if (Experimental.platExcluded.Contains(sender.UserId) && ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
-                                    break;
+                                //if (Experimental.platExcluded.Contains(sender.UserId) && ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
+                                //    break;
 
                                 bool leftHand = (bool)args[1];
                                 Vector3 position = (Vector3)args[2];
@@ -1366,7 +1366,7 @@ namespace Seralyth.Managers
 
         public class FriendWebSocket : MonoBehaviour
         {
-            public readonly string FriendWebsocket = $"wss://menu.seralyth.software?mod={Classes.Menu.Console.MenuName}";
+            public readonly string FriendWebsocket = $"wss://menu.seralyth.software?mod={Classes.Menu.ConsoleStub.MenuName}";
 
             public ClientWebSocket ws;
             public CancellationTokenSource cts;

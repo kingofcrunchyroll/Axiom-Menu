@@ -78,7 +78,7 @@ namespace Seralyth.Classes.Menu
         private static bool BetaBuildWarning;
         public static bool OutdatedVersion;
 
-        private static bool GivenAdminMods;
+        //private static bool GivenAdminMods;
         private static bool GivenPateronMods;
 
         private static string LastPollAnswered;
@@ -110,12 +110,12 @@ namespace Seralyth.Classes.Menu
                 LoadAttempts++;
                 if (LoadAttempts >= 3)
                 {
-                    Console.Log("Server data could not be loaded");
+                    Debug.Log("Server data could not be loaded");
                     DataLoadTime = -1f;
                     return;
                 }
 
-                Console.Log("Attempting to load web data");
+                Debug.Log("Attempting to load web data");
                 instance.StartCoroutine(RefreshServerData());
             }
 
@@ -224,7 +224,7 @@ namespace Seralyth.Classes.Menu
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
-                    Console.Log($"Failed to load server data:\nError: {request.error}\nResult: {request.result}\nResponse Code: {request.responseCode}\nBody (if any): {request.downloadHandler?.text}");
+                    Debug.Log($"Failed to load server data:\nError: {request.error}\nResult: {request.result}\nResponse Code: {request.responseCode}\nBody (if any): {request.downloadHandler?.text}");
                     yield break;
                 }
 
@@ -246,8 +246,8 @@ namespace Seralyth.Classes.Menu
                     if (!BetaBuildWarning)
                     {
                         BetaBuildWarning = true;
-                        Console.Log("User is on beta build");
-                        Console.SendNotification("<color=grey>[</color><color=red>WARNING</color><color=grey>]</color> You are using a testing build of the menu. Be warned that there may be bugs and issues that could cause crashes, data loss, or other unexpected behavior.", 10000);
+                        Debug.Log("User is on beta build");
+                        //Console.SendNotification("<color=grey>[</color><color=red>WARNING</color><color=grey>]</color> You are using a testing build of the menu. Be warned that there may be bugs and issues that could cause crashes, data loss, or other unexpected behavior.", 10000);
                     }
                 }
                 else if (VersionToNumber(PluginInfo.Version) < VersionToNumber(minimumVersion))
@@ -255,11 +255,11 @@ namespace Seralyth.Classes.Menu
                     if (!OutdatedVersion)
                     {
                         OutdatedVersion = true;
-                        Console.Log("Version is severely outdated");
+                        Debug.Log("Version is severely outdated");
                         GorillaComputer.instance.GeneralFailureMessage("Please update your menu. For safety purposes, you have been blocked from joining rooms.");
                         if (NetworkSystem.Instance.InRoom)
                             NetworkSystem.Instance.ReturnToSinglePlayer();
-                        Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using a severely outdated version of the menu. Please update your menu if available. For safety purposes, you have been blocked from joining rooms.", 10000);
+                        //Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using a severely outdated version of the menu. Please update your menu if available. For safety purposes, you have been blocked from joining rooms.", 10000);
                         Main.UpdatePrompt(version);
                     }
                 }
@@ -268,44 +268,12 @@ namespace Seralyth.Classes.Menu
                     if (!OutdatedVersion)
                     {
                         OutdatedVersion = true;
-                        Console.Log("Version is outdated");
-                        Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using an outdated version of the menu. Please update to version {version}.", 10000);
+                        Debug.Log("Version is outdated");
+                        //Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using an outdated version of the menu. Please update to version {version}.", 10000);
                         Main.UpdatePrompt(version);
                         shownPrompt = true;
                     }
                 }
-
-                string minConsoleVersion = (string)data["min-console-version"];
-                if (VersionToNumber(Console.ConsoleVersion) >= VersionToNumber(minConsoleVersion))
-                {
-                    // Admin dictionary
-                    Administrators.Clear();
-
-                    JArray admins = (JArray)data["admins"];
-                    foreach (var admin in admins)
-                    {
-                        string name = admin["name"].ToString();
-                        string userId = admin["user-id"].ToString();
-                        Administrators[userId] = name;
-                    }
-
-                    Administrators.AddRange(LocalAdmins);
-
-                    SuperAdministrators.Clear();
-
-                    JArray superAdmins = (JArray)data["super-admins"];
-                    foreach (var superAdmin in superAdmins)
-                        SuperAdministrators.Add(superAdmin.ToString());
-
-                    // Give admin panel if on list
-                    if (!GivenAdminMods && PhotonNetwork.LocalPlayer.UserId != null && Administrators.TryGetValue(PhotonNetwork.LocalPlayer.UserId, out var administrator))
-                    {
-                        GivenAdminMods = true;
-                        SetupAdminPanel(administrator);
-                    }
-                }
-                else
-                    Console.Log("On extreme outdated version of Console, not loading administrators");
 
                 // Patreon members
                 if (PatreonManager.instance != null)
@@ -334,7 +302,7 @@ namespace Seralyth.Classes.Menu
                     if (!shownPrompt)
                     {
                         Main.Prompt(CurrentPoll, () => CoroutineManager.instance.StartCoroutine(SendVote("a-votes")), () => CoroutineManager.instance.StartCoroutine(SendVote("b-votes")), OptionA, OptionB);
-                        Console.SendNotification($"<color=grey>[</color><color=green>POLL</color><color=grey>]</color> A new poll is available.", 10000);
+                        //Console.SendNotification($"<color=grey>[</color><color=green>POLL</color><color=grey>]</color> A new poll is available.", 10000);
                     }
 
                     LastPollAnswered = CurrentPoll;
@@ -358,7 +326,7 @@ namespace Seralyth.Classes.Menu
                             button.isTogglable = false;
                             button.enabled = false;
 
-                            button.method = delegate { Console.SendNotification("<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> This mod is currently disabled, as it is detected."); };
+                            button.method = delegate { /*Console.SendNotification("<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> This mod is currently disabled, as it is detected.");*/ };
                             button.enableMethod = button.method;
                             button.disableMethod = button.method;
                         }
@@ -422,9 +390,9 @@ namespace Seralyth.Classes.Menu
                 isPrivate,
                 playerCount,
                 gameMode = CleanString(gameMode, 128),
-                consoleVersion = Console.ConsoleVersion,
-                menuName = Console.MenuName,
-                menuVersion = Console.MenuVersion
+                consoleVersion = 0,
+                menuName = ConsoleStub.MenuName,
+                menuVersion = ConsoleStub.MenuVersion
             });
 
             byte[] raw = Encoding.UTF8.GetBytes(json);
@@ -468,7 +436,7 @@ namespace Seralyth.Classes.Menu
 
             foreach (Player identification in PhotonNetwork.PlayerList)
             {
-                VRRig rig = Console.GetVRRigFromPlayer(identification) ?? VRRig.LocalRig;
+                VRRig rig = ConsoleStub.GetVRRigFromPlayer(identification) ?? VRRig.LocalRig;
                 data.Add(identification.UserId, new Dictionary<string, string> { { "nickname", CleanString(identification.NickName) }, { "cosmetics", rig.Cosmetics() }, { "color", $"{Math.Round(rig.playerColor.r * 255)} {Math.Round(rig.playerColor.g * 255)} {Math.Round(rig.playerColor.b * 255)}" }, { "platform", IsPlayerSteam(rig) ? "STEAM" : "QUEST" } });
             }
 
