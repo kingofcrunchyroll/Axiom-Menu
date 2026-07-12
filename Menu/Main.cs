@@ -1453,6 +1453,12 @@ namespace Seralyth.Menu
             {
                 LogManager.LogError($"Error with prefix at {exc.StackTrace}: {exc.Message}");
             }
+
+            try
+            {
+                GameModeLock.CheckAndUpdate();
+            }
+            catch { }
         }
 
         private static readonly List<string> postActions = new List<string>();

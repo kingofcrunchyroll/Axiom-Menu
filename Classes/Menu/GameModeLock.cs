@@ -7,6 +7,7 @@ using Seralyth.Managers;       // for NotificationManager
 using Seralyth.Menu;           // for Main
 using GorillaNetworking;      // for GorillaGameManager
 using GorillaLocomotion;
+using Photon.Pun;             // for PhotonNetwork
 
 namespace Seralyth.Mods
 {
@@ -17,15 +18,18 @@ namespace Seralyth.Mods
 
         public static bool IsCasual()
         {
-            // TODO: confirm the real accessor — see note below
-            return GorillaGameManager.instance.GameModeName().ToUpperInvariant().Contains("CASUAL");
-            //string mode = string.ToUpper(GorillaComputer.instance?.currentGameMode) ?? "";
-            //return mode.Contains("CASUAL");
+            // TODO: confirm the real accessor
+             return GorillaGameManager.instance.GameType().ToString().ToUpperInvariant().Contains("CASUAL");
+        }
+
+        public static bool IsPrivateOrModded()
+        {
+            return GorillaGameManager.instance.GameType().ToString().ToUpperInvariant().Contains("MODDED") || !PhotonNetwork.CurrentRoom.IsVisible;
         }
 
         public static void CheckAndUpdate()
         {
-            bool shouldLock = !IsCasual();
+            bool shouldLock = !IsCasual() || !IsPrivateOrModded();
 
             if (shouldLock && !wasLocked)
                 LockDown();

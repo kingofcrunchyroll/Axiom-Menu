@@ -329,7 +329,7 @@ namespace Seralyth.Mods
                 .Aggregate("", (current, line) => current + (Environment.NewLine + "echo      " + line));
 
             string restartScript = @"@echo off
-title Seralyth Menu - Restarting Gorilla Tag
+title Axiom Menu - Restarting Gorilla Tag
 color 5
 
 cls
@@ -426,7 +426,7 @@ exit";
                         new Button
                         {
                             Label = "Download",
-                            Url = "https://github.com/Seralyth/Seralyth-Menu/"
+                            Url = "https://github.com/FluxedGaming-git/Axiom-Menu/releases/latest"
                         }
                     }
                 });
