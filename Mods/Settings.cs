@@ -21,6 +21,7 @@
 
 using GorillaExtensions;
 using GorillaLocomotion;
+using Meta.Voice.Logging;
 using Photon.Pun;
 using Photon.Realtime;
 using Seralyth.Classes.Menu;
@@ -501,6 +502,7 @@ namespace Seralyth.Mods
             string targetName = player.NickName;
 
             VRRig playerRig = GetVRRigFromPlayer(player) ?? null;
+            Color playerColor = playerRig?.playerColor ?? Color.black;
 
             List<ButtonInfo> buttons = new List<ButtonInfo> {
                 new ButtonInfo {
@@ -511,12 +513,15 @@ namespace Seralyth.Mods
                     toolTip = "Returns you back to the players tab.",
                     legal = true
                 },
+
+                //useful buttons near top
+
                 new ButtonInfo
                 {
                     buttonText = "Mute Player",
                     overlapText = IsPlayerMuted(playerRig) ? $"Unmute {targetName}" : $"Mute {targetName}",
-                    enableMethod =() => MutePlayer(playerRig, true),
-                    disableMethod =() => MutePlayer(playerRig, false),
+                    enableMethod =() => { MutePlayer(playerRig, true); try { Buttons.GetIndex("Mute Player").overlapText = IsPlayerMuted(playerRig) ? $"Unmute {targetName}" : $"Mute {targetName}"; } catch { } },
+                    disableMethod =() => { MutePlayer(playerRig, false); try { Buttons.GetIndex("Mute Player").overlapText = IsPlayerMuted(playerRig) ? $"Unmute {targetName}" : $"Mute {targetName}"; } catch { } },
                     enabled = IsPlayerMuted(playerRig),
                     toolTip = $"Makes it so that you can't hear {targetName}.",
                     legal = true
@@ -539,6 +544,80 @@ namespace Seralyth.Mods
                     toolTip = $"Shows you what {targetName} sees.",
                     legal = true
                 },
+
+                //Player Info type shit
+                new ButtonInfo
+                {
+                    buttonText = $"Check {player.NickName}'s Mods",
+                    method = () => ModChecker(player),
+                    isTogglable = false,
+                    toolTip = $"View all of \"{player.NickName}\"'s mods.",
+                    label = playerRig == null
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player Creation Date",
+                    overlapText = playerRig == null ? "-" : $"Creation Date: {GetCreationDate(player.UserId, creationDate => { Buttons.GetIndex("Player Creation Date").overlapText = $"Creation Date: {creationDate}"; ReloadMenu(); })}",
+                    label = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player Platform",
+                    overlapText = playerRig == null ? "-" : $"Platform: {((playerRig?.IsSteam() ?? false) ? "Steam" : "Quest")}",
+                    label = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Log Player",
+                    overlapText = $"Log {targetName}",
+                    method = () => ReportListCategory(player),
+                    isTogglable = false,
+                    toolTip = $"Adds a Log for the specified Reason(s) for {targetName}",
+                    legal = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player User ID",
+                    overlapText = playerRig == null ? "-" : $"User ID: {player.UserId}",
+                    method = () =>
+                    {
+                        NotificationManager.SendNotification(
+                            $"<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Successfully copied {player.UserId} to the clipboard!",
+                            5000);
+                        GUIUtility.systemCopyBuffer = player.UserId;
+                    },
+                    isTogglable = false,
+                    toolTip = $"Copies {player.UserId} to your clipboard.",
+                    label = playerRig == null
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player FPS",
+                    overlapText = playerRig == null ? "-" : $"FPS: {playerRig.fps}",
+                    label = true,
+                    legal = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player Name",
+                    overlapText = playerRig == null ? "-" : $"Name: {player.NickName}",
+                    method = () => ChangeName(player.NickName),
+                    isTogglable = false,
+                    toolTip = $"Sets your name to \"{player.NickName}\".",
+                    label = playerRig == null,
+                    legal = true
+                },
+                new ButtonInfo
+                {
+                    buttonText = "Player Color",
+                    overlapText = playerRig == null ? "-" : $"Color: {playerColor.ToRichRGBString()}",
+                    method = () => ChangeColor(playerColor),
+                    isTogglable = false,
+                    toolTip = $"Sets your color to the same as {targetName}.",
+                    label = playerRig == null,
+                    legal = true
+                },
+
                 new ButtonInfo {
                     buttonText = "Teleport to Player",
                     overlapText = $"Teleport to {targetName}",
@@ -614,75 +693,6 @@ namespace Seralyth.Mods
                 );
             }
 
-            Color playerColor = playerRig?.playerColor ?? Color.black;
-            if (playerRig)
-                buttons.AddRange(
-                    new[]
-                    {
-                        new ButtonInfo
-                        {
-                            buttonText = $"Check {player.NickName}'s Mods",
-                            method = () => ModChecker(player),
-                            isTogglable = false,
-                            toolTip = $"View all of \"{player.NickName}\"'s mods."
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player Name",
-                            overlapText = $"Name: {player.NickName}",
-                            method = () => ChangeName(player.NickName),
-                            isTogglable = false,
-                            toolTip = $"Sets your name to \"{player.NickName}\".",
-                            legal = true
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player Color",
-                            overlapText =
-                                $"Color: {playerColor.ToRichRGBString()}",
-                            method = () => ChangeColor(playerColor),
-                            isTogglable = false,
-                            toolTip = $"Sets your color to the same as {targetName}.",
-                            legal = true
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player User ID",
-                            overlapText = $"User ID: {player.UserId}",
-                            method = () =>
-                            {
-                                NotificationManager.SendNotification(
-                                    $"<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Successfully copied {player.UserId} to the clipboard!",
-                                    5000);
-                                GUIUtility.systemCopyBuffer = player.UserId;
-                            },
-                            isTogglable = false,
-                            toolTip = $"Copies {player.UserId} to your clipboard."
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player Creation Date",
-                            overlapText =
-                                $"Creation Date: {GetCreationDate(player.UserId, creationDate => { Buttons.GetIndex("Player Creation Date").overlapText = $"Creation Date: {creationDate}"; ReloadMenu(); })}",
-                            label = true
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player Platform",
-                            overlapText =
-                                $"Platform: {((playerRig?.IsSteam() ?? false) ? "Steam" : "Quest")}",
-                            label = true
-                        },
-                        new ButtonInfo
-                        {
-                            buttonText = "Player FPS",
-                            overlapText = $"FPS: {playerRig.fps}",
-                            label = true,
-                            legal = true
-                        }
-                    }
-                );
-
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
             Buttons.CurrentCategoryName = "Temporary Category";
         }
@@ -703,7 +713,7 @@ namespace Seralyth.Mods
                 new ButtonInfo {
                     buttonText = "Report HateSpeech",
                     overlapText = $"Report {playerName} for Hate Speech",
-                    method =() => {ReportPlayerFor(player, 0); NavigatePlayer(player); },
+                    method =() => {ReportPlayerFor(player, 0); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
                     isTogglable = false,
                     toolTip = "Reports the player for Hate Speech.",
                     legal = true
@@ -711,7 +721,7 @@ namespace Seralyth.Mods
                 new ButtonInfo {
                     buttonText = "Report Toxicity",
                     overlapText = $"Report {playerName} for Toxicity",
-                    method =() => {ReportPlayerFor(player, 1); NavigatePlayer(player); },
+                    method =() => {ReportPlayerFor(player, 1); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
                     isTogglable = false,
                     toolTip = "Reports the player for Toxicity.",
                     legal = true
@@ -719,7 +729,7 @@ namespace Seralyth.Mods
                 new ButtonInfo {
                     buttonText = "Report Cheating",
                     overlapText = $"Report {playerName} for Cheating",
-                    method =() => {ReportPlayerFor(player, 2); NavigatePlayer(player); },
+                    method =() => {ReportPlayerFor(player, 2); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
                     isTogglable = false,
                     toolTip = "Reports the player for Cheating.",
                     legal = true
@@ -728,6 +738,194 @@ namespace Seralyth.Mods
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
             Buttons.CurrentCategoryName = "Temporary Category";
         }
+
+        #region Logging
+
+        public static void AddPlayerToReportList(NetPlayer player, int reason)
+        {
+            string reasonText = reason switch
+            {
+                0 => "Griefing Gameplay",
+                1 => "Sound Abuse",
+                2 => "Harassment",
+                3 => "Cheating",
+                4 => "Repeating the N-Word",
+                5 => "Saying the F-Bomb",
+                6 => "Homophobia",
+                7 => "Being Fascist",
+                8 => "Spam Reporting Self",
+                9 => "Spam Reporting Lobby",
+                10 => "Sexual Harassment/Activity",
+                11 => "Bad/Bypassed Name",
+                12 => "General Racism",
+                13 => "Ghost Trolling",
+                _ => "Bad Monke (Error)"
+            };
+            string filePath = $"{PluginInfo.BaseDirectory}/Player Logs/Logs {DateTime.Now:dd-MM-yyyy}.txt";
+
+            string textData = $"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] Player: {player.NickName}, User ID: {player.UserId}, Platform: {(GetVRRigFromPlayer(player) != null ? (GetVRRigFromPlayer(player).IsSteam() ? "Steam" : "Standalone") : "Unknown" /* Fallback incase player leaves or rig is null */)}, Reason: {reasonText}";
+
+            try
+            {
+                if (!Directory.Exists($"{PluginInfo.BaseDirectory}/Player Logs"))
+                    Directory.CreateDirectory($"{PluginInfo.BaseDirectory}/Player Logs");
+
+                
+
+                List<string> lines = File.Exists(filePath)
+                    ? File.ReadAllLines(filePath).ToList()
+                    : new List<string>();
+
+                int existingIndex = lines.FindIndex(x => x.Contains($"User ID: {player.UserId}"));
+
+                if (existingIndex != -1)
+                {
+                    lines[existingIndex] += $", {reasonText}";
+                }
+                else
+                {
+                    lines.Add(textData);
+                }
+
+                File.WriteAllLines(filePath, lines);
+                NotificationManager.SendNotification($"<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Logged player to [<color=green>{filePath}</color>]", 6000);
+            }
+            catch (Exception ex)
+            {
+                NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Failed to save file with Exception {ex}", 3000);
+            }
+        }
+
+        public static void ReportListCategory(NetPlayer player)
+        {
+            var playerName = player.NickName;
+
+            List<ButtonInfo> buttons = new List<ButtonInfo>
+            {
+                new ButtonInfo {
+                    buttonText = "Cancel Log",
+                    method =() => NavigatePlayer(player),
+                    isTogglable = false,
+                    toolTip = "Returns you back to the player menu.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Gameplay Grief",
+                    overlapText = $"Log {playerName} for Griefing",
+                    method =() => {AddPlayerToReportList(player, 0); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Griefing.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Sound Abuse",
+                    overlapText = $"Log {playerName} for Sound Abuse",
+                    method =() => {AddPlayerToReportList(player, 1); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Sound Abuse.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Bad Name",
+                    overlapText = $"Log {playerName} for Bad Name",
+                    method =() => {AddPlayerToReportList(player, 11); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Having a Banned/Bypassed name.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Harassment",
+                    overlapText = $"Log {playerName} for Harassment",
+                    method =() => {AddPlayerToReportList(player, 2); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Harassment.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Cheating",
+                    overlapText = $"Log {playerName} for Cheating",
+                    method =() => {AddPlayerToReportList(player, 3); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Cheating.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Racism",
+                    overlapText = $"Log {playerName} for Racism",
+                    method =() => {AddPlayerToReportList(player, 12); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Being Racist.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Repeated Racism",
+                    overlapText = $"Log {playerName} for N-Word Spam",
+                    method =() => {AddPlayerToReportList(player, 4); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for N-Word Spamming.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Bad Homophobia",
+                    overlapText = $"Log {playerName} for saying the F-Bomb",
+                    method =() => {AddPlayerToReportList(player, 5); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for saying the F-Bomb",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Homophobia",
+                    overlapText = $"Log {playerName} for Homophobia",
+                    method =() => {AddPlayerToReportList(player, 6); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for General Homophobia",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Fascism",
+                    overlapText = $"Log {playerName} for Being Fascist",
+                    method =() => {AddPlayerToReportList(player, 7); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Being Fascist.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Spam Report Self",
+                    overlapText = $"Log {playerName} for Spam Reporting <color=grey>[</color><color=green>Self</color><color=grey>]</color>",
+                    method =() => {AddPlayerToReportList(player, 8); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Spam Reporting you.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Spam Report All",
+                    overlapText = $"Log {playerName} for Spam Reporting <color=grey>[</color><color=green>All</color><color=grey>]</color>",
+                    method =() => {AddPlayerToReportList(player, 8); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Spam Reporting everyone.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Sexual Content",
+                    overlapText = $"Log {playerName} for Sexual Harassment",
+                    method =() => {AddPlayerToReportList(player, 10); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); }},
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Sexual Harassment.",
+                    legal = true
+                },
+                new ButtonInfo {
+                    buttonText = "Log Ghost Trolling",
+                    overlapText = $"Log {playerName} for Ghost Trolling",
+                    method =() => {AddPlayerToReportList(player, 13); if (player != null) { NavigatePlayer(player); } else { PlayersTab(); } },
+                    isTogglable = false,
+                    toolTip = $"Logs {playerName} for Ghost Trolling.",
+                    legal = true
+                },
+            };
+            Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
+            Buttons.CurrentCategoryName = "Temporary Category";
+        }
+        #endregion
 
         public static void ReportPlayerFor(NetPlayer player, int reason)
         {
@@ -4564,7 +4762,7 @@ exit 0";
         public static void ChangeNarrationVoice(bool positive = true)
         {
             string[] narratorNames = {
-                "Default",
+                "Seraltyh",
                 "Kimberly",
                 "Brian",
                 "Matthew",
@@ -4841,8 +5039,8 @@ exit 0";
         // Thanks to kingofnetflix for inspiration and support with voice recognition
         private static KeywordRecognizer mainPhrases;
         private static KeywordRecognizer modPhrases;
-        private static string[] keyWords = { "jarvis", "seralyth", "seralith", "sarolith", "siri", "google", "alexa", "dummy", "computer", "stinky", "silly", "stupid", "console", "go go gadget", "monika", "wikipedia", "gideon", "a i", "ai", "a.i", "chat gpt", "chatgpt", "grok", "grock", "groq", "garmin", "axiom" };
-        private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "i hate you", "die" };
+        private static string[] keyWords = { "jarvis", "axiom", "hey axiom", "8 axiom", "asheume", "pay axiom", "accion", "axion" };
+        private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "not you" };
         public static void VoiceRecognitionOn()
         {
             if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt"))

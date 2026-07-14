@@ -34,6 +34,7 @@ namespace Seralyth.Classes.Menu
 
         public Action method;           // Every frame before GTPlayer.LateUpdate is called
         public Action postMethod;       // Every frame after GTPlayer.LateUpdate is called
+        public Action fixedMethod;
 
         public Action enableMethod;     // Once before method on enable
         public Action disableMethod;    // Once on disable

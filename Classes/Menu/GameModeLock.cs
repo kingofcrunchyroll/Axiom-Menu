@@ -18,7 +18,6 @@ namespace Seralyth.Mods
 
         public static bool IsCasual()
         {
-            // TODO: confirm the real accessor
              return GorillaGameManager.instance.GameType().ToString().ToUpperInvariant().Contains("CASUAL");
         }
 
@@ -29,7 +28,7 @@ namespace Seralyth.Mods
 
         public static void CheckAndUpdate()
         {
-            bool shouldLock = !IsCasual() || !IsPrivateOrModded();
+            bool shouldLock = !(IsCasual() || IsPrivateOrModded());
 
             if (shouldLock && !wasLocked)
                 LockDown();

@@ -570,7 +570,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Trigger Fly <color=grey>[</color><color=green>T</color><color=grey>]</color>", method = Movement.TriggerFly, toolTip = "Sends your character forwards when holding <color=green>trigger</color>."},
                 new ButtonInfo { buttonText = "Noclip Fly <color=grey>[</color><color=green>A</color><color=grey>]</color>", method = Movement.NoclipFly, toolTip = "Sends your character forwards and makes you go through objects when holding <color=green>A</color>."},
                 new ButtonInfo { buttonText = "Joystick Fly <color=grey>[</color><color=green>J</color><color=grey>]</color>", method = Movement.JoystickFly, toolTip = "Sends your character in whatever direction you are pointing your <color=green>joystick</color> in."},
-                new ButtonInfo { buttonText = "Bark Fly <color=grey>[</color><color=green>J</color><color=grey>]</color>", postMethod = Movement.BarkFly, toolTip = "Acts like the fly that Bark has. Credits to KyleTheScientist."},
+                new ButtonInfo { buttonText = "Bark Fly <color=grey>[</color><color=green>J</color><color=grey>]</color>", fixedMethod = Movement.BarkFly, toolTip = "Acts like the fly that Bark has. Credits to KyleTheScientist."},
                 new ButtonInfo { buttonText = "Hand Fly <color=grey>[</color><color=green>A</color><color=grey>]</color>", method = Movement.HandFly, toolTip = "Sends your character in your hand's direction when holding <color=green>A</color>."},
                 new ButtonInfo { buttonText = "Fly Towards Gun", method = Movement.FlyTowardsGun, toolTip = "Sends your character towards whoever your hand desires."},
                 new ButtonInfo { buttonText = "Slingshot Fly <color=grey>[</color><color=green>A</color><color=grey>]</color>", method = Movement.SlingshotFly, toolTip = "Sends your character forwards, in a more elastic manner, when holding <color=green>A</color>."},
@@ -605,7 +605,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Force Tag Freeze", method = Movement.ForceTagFreeze, disableMethod = Movement.NoTagFreeze, toolTip = "Forces tag freeze on your character."},
                 new ButtonInfo { buttonText = "Feather Falling", method = Movement.FeatherFalling, toolTip = "Makes you fall like a feather."},
                 new ButtonInfo { buttonText = "Low Gravity", aliases = new[] { "Moon Gravity" }, method = Movement.LowGravity, toolTip = "Makes gravity lower on your character."},
-                new ButtonInfo { buttonText = "Zero Gravity", aliases = new[] { "No Gravity" }, postMethod = Movement.ZeroGravity, toolTip = "Disables gravity on your character."},
+                new ButtonInfo { buttonText = "Zero Gravity", aliases = new[] { "No Gravity" }, fixedMethod = Movement.ZeroGravity, toolTip = "Disables gravity on your character."},
                 new ButtonInfo { buttonText = "High Gravity", aliases = new[] { "Mars Gravity" }, method = Movement.HighGravity, toolTip = "Makes gravity higher on your character."},
                 new ButtonInfo { buttonText = "Reverse Gravity", aliases = new[] { "Flip Gravity" }, method = Movement.ReverseGravity, disableMethod = Movement.UnflipCharacter, toolTip = "Reverses gravity on your character."},
 
