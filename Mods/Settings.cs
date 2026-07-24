@@ -223,7 +223,7 @@ namespace Seralyth.Mods
             }
 
             source = Path.Combine(directoryToUse, preferences);
-            destination = Path.Combine(PluginInfo.BaseDirectory, "Seralyth_Preferences.txt");
+            destination = Path.Combine(PluginInfo.BaseDirectory, "Axiom_Preferences.txt");
 
             if (File.Exists(source))
             {
@@ -260,7 +260,7 @@ namespace Seralyth.Mods
 
         public static void UpdateSoundPreferences()
         {
-            string fileText = File.ReadAllText($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt").Replace("\r", "");
+            string fileText = File.ReadAllText($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt").Replace("\r", "");
             string[] textData = fileText.Split('\n');
             string[] data = textData[2].Split(";;");
 
@@ -284,7 +284,7 @@ namespace Seralyth.Mods
             data[25] = SoundManager.DefaultSounds["Notification"];
             textData[2] = string.Join(";;", data);
 
-            File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt", string.Join("\n", textData));
+            File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt", string.Join("\n", textData));
         }
 
         public static GameObject TutorialObject;
@@ -408,7 +408,7 @@ namespace Seralyth.Mods
             string version = PluginInfo.Version;
             if (PluginInfo.BetaBuild) version = "<color=blue>Beta</color> " + version;
             Buttons.AddButton(category, new ButtonInfo { buttonText = "Exit Info Screen", method = () => Toggle("Info Screen"), isTogglable = false, toolTip = "Returns you back to the main page." });
-            Buttons.AddButton(category, new ButtonInfo { buttonText = "DebugMenuName", overlapText = "<color=grey><b>Seralyth Menu </b></color>" + version, label = true });
+            Buttons.AddButton(category, new ButtonInfo { buttonText = "DebugMenuName", overlapText = "<color=grey><b>Axiom Menu </b></color>" + version, label = true });
             Buttons.AddButton(category, new ButtonInfo { buttonText = "DebugColor", overlapText = "Loading...", label = true });
             Buttons.AddButton(category, new ButtonInfo { buttonText = "DebugName", overlapText = "Loading...", label = true });
             Buttons.AddButton(category, new ButtonInfo { buttonText = "DebugId", overlapText = "Loading...", label = true });
@@ -615,6 +615,22 @@ namespace Seralyth.Mods
                     isTogglable = false,
                     toolTip = $"Sets your color to the same as {targetName}.",
                     label = playerRig == null,
+                    legal = true
+                },
+
+                new ButtonInfo {
+                    buttonText = "BadMonke",
+                    overlapText = $"Add {targetName} to Avoid List",
+                    method = () => AddBadMonke(player),
+                    isTogglable = false,
+                    toolTip = $"Add's {targetName} to the Avoid List",
+                    legal = true
+                },
+
+                new ButtonInfo
+                {
+                    buttonText = "<color=grey>[</color><color=red>WARNING</color><color=grey>]</color> PRESSING THE BUTTON ABOVE WILL <color=red><b>KICK</b></color> YOU",
+                    label = true,
                     legal = true
                 },
 
@@ -925,6 +941,17 @@ namespace Seralyth.Mods
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
             Buttons.CurrentCategoryName = "Temporary Category";
         }
+
+        public static void AddBadMonke(NetPlayer player)
+        {
+            string path = $"{PluginInfo.BaseDirectory}/MonkeToAvoid.txt";
+            if (!File.Exists(path))
+                File.Create(path).Dispose();
+
+            if (!File.ReadLines(path).Contains(player.UserId))
+                File.AppendAllText(path, player.UserId + Environment.NewLine);
+        }
+
         #endregion
 
         public static void ReportPlayerFor(NetPlayer player, int reason)
@@ -1095,7 +1122,7 @@ namespace Seralyth.Mods
                             logoLines += Environment.NewLine + @" ""    " + line + @" """;
 
                         string updateScript = @"@echo off
-title Seralyth Menu Updater
+title Axiom Menu Updater
 color 5
 setlocal
 
@@ -1112,7 +1139,7 @@ set ""MODS_PATH=%BASE_DIR%Mods""
 
 set ""MENU_FILE=""
 
-for %%F in (""%PLUGIN_PATH%\*Seralyth*Menu*.dll"" ""%MODS_PATH%\*Seralyth*Menu*.dll"") do (
+for %%F in (""%PLUGIN_PATH%\*Axiom*Menu*.dll"" ""%MODS_PATH%\*Axiom*Menu*.dll"") do (
     if exist ""%%~fF"" (
         set ""MENU_FILE=%%~fF""
         goto update
@@ -1125,14 +1152,14 @@ goto restart
 :update
 echo Found menu file: ""%MENU_FILE%""
 
-set ""DOWNLOAD_NAME=Seralyth-Menu""
+set ""DOWNLOAD_NAME=Axiom-Menu""
 echo %MENU_FILE% | find /I ""Legal"" >nul
 if %ERRORLEVEL%==0 set ""DOWNLOAD_NAME=Seralyth-Menu-Legal""
 
 echo Downloading latest release of %DOWNLOAD_NAME%...
 
 curl -L -o ""%MENU_FILE%"" ^
-""https://github.com/Seralyth/Seralyth-Menu/releases/latest/download/%DOWNLOAD_NAME%.dll""
+""https://github.com/FluxedGaming-Git/Axiom-Menu/releases/latest/download/%DOWNLOAD_NAME%.dll""
 
 :WAIT_LOOP
 tasklist /FI ""IMAGENAME eq Gorilla Tag.exe"" | find /I ""Gorilla Tag.exe"" >nul
@@ -1175,7 +1202,7 @@ MODS_PATH=""$BASE_DIR/Mods""
 
 MENU_FILE=""""
 
-for f in ""$PLUGIN_PATH""/*Seralyth*Menu*.dll ""$MODS_PATH""/*Seralyth*Menu*.dll; do
+for f in ""$PLUGIN_PATH""/*Axiom*Menu*.dll ""$MODS_PATH""/*Axiom*Menu*.dll; do
     if [ -f ""$f"" ]; then
         MENU_FILE=""$f""
         break
@@ -1187,14 +1214,14 @@ if [ -z ""$MENU_FILE"" ]; then
 else
     echo ""Found menu file: $MENU_FILE""
 
-    DOWNLOAD_NAME=""Seralyth-Menu""
+    DOWNLOAD_NAME=""Axiom-Menu""
     if echo ""$MENU_FILE"" | grep -qi ""Legal""; then
         DOWNLOAD_NAME=""Seralyth-Menu-Legal""
     fi
 
     echo ""Downloading latest release of $DOWNLOAD_NAME...""
     curl -L -o ""$MENU_FILE"" \
-    ""https://github.com/Seralyth/Seralyth-Menu/releases/latest/download/${DOWNLOAD_NAME}.dll""
+    ""https://github.com/FluxedGaming-Git/Axiom-Menu/releases/latest/download/${DOWNLOAD_NAME}.dll""
 fi
 
 while pgrep -f ""GorillaTag.exe"" > /dev/null; do
@@ -1361,24 +1388,24 @@ exit 0";
 
             switch (themeType)
             {
-                case 1: // Seralyth
+                case 1: // Axiom
                     backgroundColor = new ExtGradient
                     {
                         colors = ExtGradient.GetSolidGradient(new Color32(118, 6, 252, 128))
                     };
                     menuBackgroundColor = new ExtGradient
                     {
-                        colors = ExtGradient.GetSolidGradient(new Color32(22, 22, 22, 128))
+                        colors = ExtGradient.GetSolidGradient(new Color32(255, 90, 161, 255))
                     };
                     buttonColors = new[]
                     {
                         new ExtGradient // Released
                         {
-                            colors = ExtGradient.GetSolidGradient(new Color32(118, 6, 252, 255))
+                            colors = ExtGradient.GetSolidGradient(new Color32(255, 141, 172, 255))
                         },
                         new ExtGradient // Pressed
                         {
-                            colors = ExtGradient.GetSolidGradient(new Color32(88, 6, 186, 255))
+                            colors = ExtGradient.GetSolidGradient(new Color32(250, 195, 212, 255))
                         }
                     };
                     textColors = new[]
@@ -4120,7 +4147,7 @@ exit 0";
         private static int previousPage;
         public static void CustomMenuTheme()
         {
-            if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_CustomThemeColor.txt"))
+            if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_CustomThemeColor.txt"))
                 WriteCustomTheme();
 
             ReadCustomTheme();
@@ -4346,7 +4373,7 @@ exit 0";
 
         public static void ReadCustomTheme()
         {
-            string[] linesplit = File.ReadAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomThemeColor.txt").Split("\n");
+            string[] linesplit = File.ReadAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomThemeColor.txt").Split("\n");
 
             string[] a = linesplit[0].Split(",");
             backgroundColor.SetColor(0, new Color32(byte.Parse(a[0]), byte.Parse(a[1]), byte.Parse(a[2]), 255));
@@ -4373,7 +4400,7 @@ exit 0";
 
         public static void ImportCustomTheme(string theme)
         {
-            File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomThemeColor.txt", theme);
+            File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomThemeColor.txt", theme);
             ReadCustomTheme();
         }
 
@@ -4404,7 +4431,7 @@ exit 0";
         }
 
         public static void WriteCustomTheme() =>
-            File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomThemeColor.txt", ExportCustomTheme());
+            File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomThemeColor.txt", ExportCustomTheme());
 
         public static void FixTheme()
         {
@@ -5009,18 +5036,18 @@ exit 0";
                 {
                     PromptSingleText("What would you like to set the menu name to?", () =>
                     {
-                        File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomMenuName.txt", keyboardInput);
+                        File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomMenuName.txt", keyboardInput);
                         Apply();
-                        PromptSingle("You can always change this again by re-enabling the mod or changing it in the SeralythMenu folder! (located in the Gorilla Tag installation folder)");
+                        PromptSingle("You can always change this again by re-enabling the mod or changing it in the Axiom Menu folder! (located in the Gorilla Tag installation folder)");
                     });
                 }, Apply);
 
                 static void Apply()
                 {
                     doCustomName = true;
-                    if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_CustomMenuName.txt"))
-                        File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomMenuName.txt", "Your Text Here");
-                    customMenuName = File.ReadAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomMenuName.txt");
+                    if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_CustomMenuName.txt"))
+                        File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomMenuName.txt", "Your Text Here");
+                    customMenuName = File.ReadAllText($"{PluginInfo.BaseDirectory}/Axiom_CustomMenuName.txt");
                 }
             }
         }
@@ -5043,9 +5070,9 @@ exit 0";
         private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "not you" };
         public static void VoiceRecognitionOn()
         {
-            if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt"))
-                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt", keyWords);
-            keyWords = File.ReadAllLines($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt");
+            if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt"))
+                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt", keyWords);
+            keyWords = File.ReadAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt");
             mainPhrases = new KeywordRecognizer(keyWords);
             mainPhrases.OnPhraseRecognized += ModRecognition;
             mainPhrases.Start();
@@ -5209,9 +5236,9 @@ exit 0";
             else if (PhraseRecognitionSystem.Status != SpeechSystemStatus.Stopped)
                 PromptSingle("You can not use AI Assistant while you have another voice-related mod on.", () => mod.enabled = false, "Ok");
 
-            if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt"))
-                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt", keyWords);
-            keyWords = File.ReadAllLines($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt");
+            if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt"))
+                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt", keyWords);
+            keyWords = File.ReadAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt");
 
             while (PhraseRecognitionSystem.Status != SpeechSystemStatus.Stopped)
                 yield return null;
@@ -6148,14 +6175,14 @@ exit 0";
 
         public static void ResetVoiceCommandsKeywords()
         {
-            if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt"))
-                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Seralyth_Keywords.txt", keyWords);
+            if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt"))
+                File.WriteAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt", keyWords);
         }
 
         public static void ResetSystemPrompt()
         {
-            if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_SystemPrompt.txt"))
-                File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_SystemPrompt.txt", AIManager.SystemPrompt);
+            if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_SystemPrompt.txt"))
+                File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_SystemPrompt.txt", AIManager.SystemPrompt);
         }
 
         public static string SavePreferencesToText()
@@ -6310,7 +6337,7 @@ exit 0";
         }
 
         public static void SavePreferences() =>
-            File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt", SavePreferencesToText());
+            File.WriteAllText($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt", SavePreferencesToText());
 
         private static void TryLoad(Action load, string fieldName)
         {
@@ -6502,14 +6529,14 @@ exit 0";
         {
             try
             {
-                if (!File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt"))
+                if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt"))
                 {
                     hasLoadedPreferences = true;
                     return;
                 }
 
                 UpdateSoundPreferences();
-                string text = File.ReadAllText($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt");
+                string text = File.ReadAllText($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt");
                 LoadPreferencesFromText(text);
             }
             catch (Exception e) { LogManager.Log("Error loading preferences: " + e.Message); }
@@ -6559,7 +6586,7 @@ exit 0";
 
         public static void LoadPCControls()
         {
-            string fileName = $"{PluginInfo.BaseDirectory}/Seralyth_PCControls.txt";
+            string fileName = $"{PluginInfo.BaseDirectory}/Axiom_PCControls.txt";
 
             if (File.Exists(fileName))
             {

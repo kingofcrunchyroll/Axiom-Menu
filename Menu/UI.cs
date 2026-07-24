@@ -75,6 +75,8 @@ namespace Seralyth.Menu
             b = canvas.Find("ControlUI/B")?.GetComponent<TMP_InputField>();
             textInput = canvas.Find("ControlUI/TextInput")?.GetComponent<TMP_InputField>();
 
+            textInput.text = "Axiom";
+
             Button queueButton = canvas.Find("ControlUI/QueueButton")?.GetComponent<Button>();
             if (queueButton != null)
                 queueButton.onClick.AddListener(() => Mods.Important.QueueRoom(textInput?.text ?? ""));
@@ -417,7 +419,7 @@ namespace Seralyth.Menu
                 uiPrefab.SetActive(false);
         }
 
-        private readonly string hideGUIPath = $"{PluginInfo.BaseDirectory}/Seralyth_HideGUI.txt";
+        private readonly string hideGUIPath = $"{PluginInfo.BaseDirectory}/Axiom_HideGUI.txt";
         private void ToggleGUI()
         {
             isOpen = !isOpen;
@@ -432,7 +434,7 @@ namespace Seralyth.Menu
                 else
                 {
                     if (!File.Exists(hideGUIPath))
-                        File.WriteAllText(hideGUIPath, "Text file generated with Seralyth Menu");
+                        File.WriteAllText(hideGUIPath, "Text file generated with Axiom Menu");
                 }
             }
             catch { }

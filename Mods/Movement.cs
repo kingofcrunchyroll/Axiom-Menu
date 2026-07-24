@@ -2408,9 +2408,52 @@ namespace Seralyth.Mods
             {
                 GorillaTagger.Instance.rigidbody.AddForce(walkNormal * -9.81f, ForceMode.Acceleration);
                 GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Lerp(GTPlayer.Instance.GetControllerTransform(false).parent.rotation, Quaternion.LookRotation(walkNormal) * Quaternion.Euler(90f, 0f, 0f), Time.deltaTime);
+                //GTPlayerTransform.ApplyRotationOverride(Quaternion.Lerp(GTPlayerTransform.BodyRotation, Quaternion.LookRotation(walkNormal) * Quaternion.Euler(90f, 0f, 0f), Time.deltaTime), Time.frameCount);
                 ZeroGravity();
             }
         }
+
+        static bool flipping;
+        static float flipStart;
+        static Quaternion flipFrom;
+        static Vector3 flipAxis;
+        const float flipDuration = 1f;
+
+        public static void Flip()
+        {
+            bool silentFlip = Buttons.GetIndex("Silent Flip").enabled;
+            if (!flipping && (rightPrimary || rightSecondary) && VRRig.LocalRig.enabled)
+            {
+                if (GTPlayer.Instance.playerRigidBody)
+                {
+                    flipping = true;
+                    flipStart = Time.time;
+                    flipAxis = rightPrimary ? VRRig.LocalRig.transform.right : -VRRig.LocalRig.transform.right;
+                    flipFrom = GTPlayer.Instance?.playerRigidBody?.rotation ?? Quaternion.identity;
+                }
+            }
+            if (!flipping) return;
+
+            float t = (Time.time - flipStart) / flipDuration;
+            if (t >= 1f)
+            {
+                flipping = false;
+                if (silentFlip)
+                    VRRig.LocalRig.transform.rotation = flipFrom;
+                else
+                    GTPlayerTransform.ApplyRotationOverride(flipFrom, Time.frameCount);
+
+                return;
+            }
+            var rot = Quaternion.AngleAxis(-360f * t, flipAxis) * flipFrom;
+            if (silentFlip)
+                VRRig.LocalRig.transform.rotation = Quaternion.Euler(0f, GorillaTagger.Instance.bodyCollider.transform.eulerAngles.y, 0f) * rot;
+            else
+                GTPlayerTransform.ApplyRotationOverride(rot, Time.frameCount);
+        }
+
+        public static void SpiderCrawl() =>
+            GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
 
         public static void TeleportToRandom()
         {

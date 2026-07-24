@@ -489,6 +489,29 @@ namespace Seralyth.Mods
             }
         }
 
+        public static void AvoidAnnoyingMonke()
+        {
+            string path = $"{PluginInfo.BaseDirectory}/MonkeToAvoid.txt";
+
+            if (!File.Exists(path))
+                return;
+
+            HashSet<string> blockedUsers = File.ReadLines(path)
+                .Select(line => line.Trim())
+                .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
+                .ToHashSet();
+
+            foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
+            {
+                if (blockedUsers.Contains(player.UserId))
+                {
+                    PhotonNetwork.Disconnect();
+                    NotificationManager.SendNotification($"<color=grey>[</color><color=purple>ANNOYING MONKE</color><color=grey>]</color> Disconnected because {player.NickName} was in the room.", 6000);
+                    return;
+                }
+            }
+        }
+
         public static void AntiContentCreator()
         {
             foreach (var vrrig in VRRigCache.ActiveRigs.Where(vrrig => !vrrig.isOfflineVRRig && Visuals.specialCosmetics.Keys.Any(x => vrrig.Cosmetics().Contains(x))))

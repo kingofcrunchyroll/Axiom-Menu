@@ -176,7 +176,7 @@ namespace Seralyth.Menu
             }
 
             loadPreferencesTime = Time.time;
-            if (File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_Preferences.txt"))
+            if (File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Preferences.txt"))
             {
                 try
                 {
@@ -5657,6 +5657,8 @@ namespace Seralyth.Menu
             if (Safety.spoofingPlatform)
                 Safety.SpoofPlatform(true);
 
+            Safety.AvoidAnnoyingMonke();
+
             OnMasterClientSwitch(NetworkSystem.Instance.MasterClient);
             RPCProtection();
         }
@@ -5697,6 +5699,7 @@ namespace Seralyth.Menu
                 NotificationManager.SendNotification($"<color=grey>[</color><color=green>JOIN</color><color=grey>]</color> Name: {CleanPlayerName(Player.NickName)}");
             if (Safety.spoofingPlatform)
                 Safety.SpoofPlatform(true);
+            Safety.AvoidAnnoyingMonke();
         }
 
         private static void OnPlayerLeave(NetPlayer Player)

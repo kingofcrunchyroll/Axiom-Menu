@@ -117,6 +117,8 @@ namespace Seralyth.Mods
 
             soundboardVolumeIndex = Mathf.Round(soundboardVolumeIndex / 0.05f) * 0.05f;
 
+            soundboardVolumeIndex = Mathf.Clamp(soundboardVolumeIndex, 0.1f, 1.5f);
+
             VoiceManager.Get().ClipVolume = soundboardVolumeIndex;
 
             Buttons.GetIndex("Change Soundboard Volume").overlapText = "Change Default Soundboard Volume <color=grey>[</color><color=green>" + soundboardVolumeIndex + "</color><color=grey>]</color>";
