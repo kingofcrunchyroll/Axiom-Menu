@@ -7,7 +7,7 @@
 # Axiom Menu  
 <sub>Forked from Seralyth Menu</sub>
 
-**Axiom Menu** is a Mod Menu designed to try and **Entertain** the Monke's of Gorilla Tag. It is a menu for those like me who want to hear people laugh instead of tormenting those without such ability. This menu is **Not** to be used for advantages or to harrass or annoy players. See the **Terms Of Use** in our [Discord Server](https://discord.gg/gNqNT7upCh) for more information.
+**Axiom Menu** is a Mod Menu designed to try and **Entertain** the Monke of Gorilla Tag. It is a menu for those like me who want to hear people laugh instead of tormenting those without such ability. This menu is **NOT** to be used for advantages or to harrass or annoy players. See the **Terms Of Use** in our [Discord Server](https://discord.gg/gNqNT7upCh) for more information.
 
 <details>
   <summary><b>❔ What did you change?</b></summary>
