@@ -1956,6 +1956,7 @@ namespace Seralyth.Menu
             "Chat Messages",
             "Macros",
             "Achievements",
+            "Mod List",
             "Patreon Mods",
             "Patreon Settings",
             "Voice Changers",

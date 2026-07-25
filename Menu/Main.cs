@@ -226,7 +226,7 @@ namespace Seralyth.Menu
                     NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> {PatchHandler.PatchErrors} patch{(PatchHandler.PatchErrors > 1 ? "es" : "")} failed to initialize. Please report this as an issue to the GitHub repository.", 10000);
             }
 
-            SuperUser.GetSuperTools(PhotonNetwork.LocalPlayer.UserId);
+            SuperUser.GetSuperTools();
         }
 
         public static void Prefix()
