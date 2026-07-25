@@ -42,6 +42,10 @@ namespace Axiom.Managers
         private static Dictionary<string, RoleEntry> cachedRoles = new Dictionary<string, RoleEntry>();
         private static bool isFetching;
 
+        // True once the first fetch attempt has completed (success or failure) - lets callers
+        // wait for real data instead of racing the async fetch and reading an empty cache.
+        public static bool HasFetchedOnce { get; private set; }
+
         public static RoleTier GetRoleTier(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -51,7 +55,7 @@ namespace Axiom.Managers
             {
                 return entry.Tier switch
                 {
-                    "Delevoper" => RoleTier.Developer,
+                    "Developer" => RoleTier.Developer,
                     "SuperUser" => RoleTier.SuperUser,
                     "MenuUser" => RoleTier.MenuUser,
                     _ => RoleTier.None
@@ -113,6 +117,7 @@ namespace Axiom.Managers
             }
 
             isFetching = false;
+            HasFetchedOnce = true;
         }
     }
 }
