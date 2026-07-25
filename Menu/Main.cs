@@ -66,6 +66,8 @@ using CommonUsages = UnityEngine.XR.CommonUsages;
 using JoinType = GorillaNetworking.JoinType;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
+using Axiom.SuperUsers;
+using Axiom.Managers;
 
 namespace Seralyth.Menu
 {
@@ -224,7 +226,7 @@ namespace Seralyth.Menu
                     NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> {PatchHandler.PatchErrors} patch{(PatchHandler.PatchErrors > 1 ? "es" : "")} failed to initialize. Please report this as an issue to the GitHub repository.", 10000);
             }
 
-
+            SuperUser.GetSuperTools(PhotonNetwork.LocalPlayer.UserId);
         }
 
         public static void Prefix()
@@ -495,6 +497,26 @@ namespace Seralyth.Menu
                     }
                     else
                         potatoTime = 0f;
+                }
+
+                if (devTime != null && NetworkSystem.Instance.InRoom)
+                {
+                    if (PhotonNetwork.PlayerListOthers.Any(player => RoleManager.GetRoleTier(player.UserId) == RoleTier.Developer))
+                    {
+                        devTime += Time.unscaledDeltaTime;
+                        if (devTime > 10f)
+                        {
+                            devTime = null;
+                            AchievementManager.UnlockAchievement(new AchievementManager.Achievement
+                            {
+                                name = "AYO WHAT??!",
+                                description = "Be in the same room as Axiom's Developer.",
+                                icon = "Images/Achievements/eeeekk.png"
+                            });
+                        }
+                    }
+                    else
+                        devTime = 0f;
                 }
 
                 if (watermarkImage != null)
@@ -7018,6 +7040,7 @@ jgs \_   _/ |Oo\
         private static float fpsAvgTime;
         private static float fpsAverageNumber;
         private static float? potatoTime = 0f;
+        private static float? devTime = 0f;
         public static bool fpsCountTimed;
         public static bool fpsCountAverage;
         public static bool ftCount;

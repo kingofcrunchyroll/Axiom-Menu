@@ -1910,6 +1910,11 @@ namespace Seralyth.Menu
             {
                 new ButtonInfo { buttonText = "Exit Sound's Properties", method = () => CurrentCategoryName = "Soundboard", isTogglable = false, toolTip = "Returns you back to the Soundboard page.", legal = true}
             },
+
+            new[] // SuperUser Tools
+            {
+                new ButtonInfo { buttonText = "Exit Super User Tools", method =() => CurrentCategoryName = "Main", isTogglable = false, toolTip = "Returns you back to the main page."},
+            }
         };
 
         public static string[] categoryNames = {
@@ -1954,7 +1959,8 @@ namespace Seralyth.Menu
             "Patreon Mods",
             "Patreon Settings",
             "Voice Changers",
-            "Sound Properties"
+            "Sound Properties",
+            "SuperUser Tools"
         };
 
         public static int _currentCategoryIndex;

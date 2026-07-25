@@ -11,6 +11,7 @@ using Seralyth.Utilities;
 using Seralyth.Classes.Menu;
 using static Seralyth.Utilities.AssetUtilities;
 using static Seralyth.Utilities.FileUtilities;
+using static Seralyth.Utilities.RigUtilities;
 using Seralyth.Mods;
 
 namespace Axiom.Managers
@@ -24,10 +25,9 @@ namespace Axiom.Managers
 		private static Material superUserMaterial;
 		private static Material blacklistMaterial;
 
-		// Assign these in the inspector, or load via your existing asset-loading pipeline
 		public Texture2D menuUserTexture = LoadTextureFromResource($"{PluginInfo.ClientResourcePath}.icon.png");
-		public Texture2D superUserTexture = LoadTextureFromResource($"{PluginInfo.ServerResourcePath}/Images/Mods/stick.png");
-		public Texture2D blacklistTexture = LoadTextureFromResource($"{PluginInfo.ServerResourcePath}/Images/Mods/warning.png");
+		public Texture2D superUserTexture = LoadTextureFromURL($"{PluginInfo.ServerResourcePath}/Images/Mods/stick.png", "stick.png");
+		public Texture2D blacklistTexture = LoadTextureFromURL($"{PluginInfo.ServerResourcePath}/Images/Mods/warning.png", "warning.png");
 		public Texture2D developerTexture = LoadTextureFromURL($"{ServerData.AssetURL}/crown.png", "crown.png");
 
 		// How far above the nametag the icon floats, scaled by the target's own rig scale
@@ -91,10 +91,7 @@ namespace Axiom.Managers
 					iconObject.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
 				}
 			}
-			catch
-			{
-				// Matches the defensive try/catch pattern already used around per-frame rig iteration elsewhere in this codebase
-			}
+			catch {	}
 		}
 
 		// Returns the material to use for this player's badge, or null if they get no badge at all.
@@ -141,13 +138,6 @@ namespace Axiom.Managers
 			mat.SetFloat("_ZWrite", 0);
 			mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
 			mat.renderQueue = (int)RenderQueue.Transparent;
-		}
-
-		// Reuse the shared helper if one already exists in a common utility class elsewhere -
-		// this is included standalone so the file compiles even if it doesn't.
-		private static VRRig GetVRRigFromPlayer(Player player)
-		{
-			return VRRigCache.ActiveRigs.FirstOrDefault(rig => rig?.Creator?.GetPlayerRef() == player);
 		}
 	}
 }
