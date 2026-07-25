@@ -34,7 +34,6 @@ namespace Axiom.Managers
 
     public static class BlacklistManager
     {
-        // Raw GitHub content URL - swap "main" for your default branch name if different
         private const string BlacklistUrl =
             "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/main/blacklist.json";
 
@@ -78,8 +77,6 @@ namespace Axiom.Managers
         // The client never has GitHub write access - the worker enforces who's allowed to ban.
         private const string BanSubmitUrl = "https://axiom-ban-worker.<your-subdomain>.workers.dev";
 
-        // Call from your "Blacklist this player" button. requesterId should be your own
-        // PhotonNetwork.LocalPlayer.UserId - the worker checks that against its own
         // authorized list server-side, so this isn't a trust-the-client situation.
         public static IEnumerator SubmitBan(string requesterId, string targetUserId, string rank, string reason, Action<bool, string> onComplete = null)
         {
@@ -104,8 +101,7 @@ namespace Axiom.Managers
 
             if (success)
             {
-                // Pull the fresh list immediately rather than waiting for the next poll tick -
-                // this is what makes it actually apply "mid-game" for the person who just banned.
+                // Pull the fresh list immediately rather than waiting for the next poll tick
                 yield return FetchOnce();
             }
         }

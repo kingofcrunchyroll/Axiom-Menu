@@ -621,7 +621,7 @@ namespace Seralyth.Mods
                 new ButtonInfo {
                     buttonText = "BadMonke",
                     overlapText = $"Add {targetName} to Avoid List",
-                    method = () => AddBadMonke(player),
+                    method = () => Prompt("Are you sure?\n\nAccepting will make you Disconnect if someone joins.", () => AddBadMonke(player),() => NavigatePlayer(player)),
                     isTogglable = false,
                     toolTip = $"Add's {targetName} to the Avoid List",
                     legal = true

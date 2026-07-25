@@ -4271,6 +4271,11 @@ namespace Seralyth.Menu
             Prompt($"A new version is available ({versionArchive}). Would you like to update?", Settings.UpdateMenu);
         }
 
+        public static void BannedPrompt(string issuer, string reason)
+        {
+            PromptSingle($"You have been Banned from using Axiom.\n\nBan Reason: {reason}\nIssuer: {issuer}\n\n(You can try to make an appeal in the Discord.)", () => /*Lockdown = true*/Buttons.CurrentCategoryName = "SuperUser Tools");
+        }
+
         public static readonly Dictionary<(Color, Color), Texture2D> cacheGradients = new Dictionary<(Color, Color), Texture2D>();
 
         public static Texture2D GetGradientTexture(Color colorA, Color colorB)

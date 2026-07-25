@@ -27,7 +27,7 @@ namespace Axiom.Managers
                 LockReason = cached.Length > 0 ? cached[0] : "Unknown";
                 Enum.TryParse(cached.Length > 1 ? cached[1] : "None", out IssuerRank rank);
                 LockIssuer = rank;
-                Lock();
+                Lock(LockReason, LockIssuer);
                 yield break;
             }
 
@@ -41,7 +41,7 @@ namespace Axiom.Managers
                 LockReason = reason;
                 LockIssuer = issuer;
                 PersistLock(reason, issuer);
-                Lock();
+                Lock(reason, issuer);
             }
         }
 
@@ -58,11 +58,11 @@ namespace Axiom.Managers
             }
         }
 
-        private static void Lock()
+        private static void Lock(string reason, IssuerRank issuer)
         {
             IsLocked = true;
             UnityEngine.Debug.LogWarning($"[Axiom] Menu locked. Issued by: {LockIssuer}. Reason: {LockReason}");
-            Main.Lockdown = true;
+            Main.BannedPrompt(issuer.ToString(), reason);
             // Hook into your menu's own visibility/toggle system here, e.g.:
             // Main.MenuEnabled = false;
             // Main.ForceHidden = true;

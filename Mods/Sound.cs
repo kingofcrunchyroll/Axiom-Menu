@@ -438,17 +438,17 @@ namespace Seralyth.Mods
                     overlapText = $"Change Volume <color=grey>[</color><color=green>{Math.Round(sound.Clip.Volume, 1)}</color><color=grey>]</color>",
                     method = () =>
                     {
-                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume + 0.05f, 0.05f), 0, 10);
+                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume + 0.05f, 0.05f), 0, 1.5f);
                         volumeButton.overlapText = $"Change Volume <color=grey>[</color><color=green>{sound.Clip.Volume:F2}</color><color=grey>]</color>";
                     },
                     enableMethod = () =>
                     {
-                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume + 0.05f, 0.05f), 0, 10);
+                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume + 0.05f, 0.05f), 0, 1.5f);
                         volumeButton.overlapText = $"Change Volume <color=grey>[</color><color=green>{sound.Clip.Volume:F2}</color><color=grey>]</color>";
                     },
                     disableMethod = () =>
                     {
-                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume - 0.05f, 0.05f), 0, 10);
+                        sound.Clip.Volume = Mathf.Clamp(Step(sound.Clip.Volume - 0.05f, 0.05f), 0, 1.5f);
                         volumeButton.overlapText = $"Change Volume <color=grey>[</color><color=green>{sound.Clip.Volume:F2}</color><color=grey>]</color>";
                     },
                     incremental = true,

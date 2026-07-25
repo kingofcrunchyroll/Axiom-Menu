@@ -27,7 +27,7 @@ namespace Seralyth
         public const string Name = "Axiom Menu";
         public const string Description = "The 'More Legal' Seralyth";
         public const string BuildTimestamp = "2026-07-08T15:58:08Z";
-        public const string Version = "1.3.1";
+        public const string Version = "1.4.6";
 
         public const string BaseDirectory =
 #if LEGAL || LEGAL_DEBUG
@@ -37,6 +37,7 @@ namespace Seralyth
 #endif
         public const string ClientResourcePath = "AxiomMenu.Resources.Client";
         public const string ServerResourcePath = "https://raw.githubusercontent.com/Seralyth/Seralyth-Menu/master/Resources/Server";
+        public const string AxiomServerPath = "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/refs/heads/main/";
         public const string ServerAPI = "https://menu.seralyth.software";
         public const string Logo = @"
                                             %%%%%                                                   

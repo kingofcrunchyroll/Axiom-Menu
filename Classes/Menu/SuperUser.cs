@@ -67,6 +67,7 @@ namespace Axiom.SuperUsers
                     new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.hideSelfIcon = true, disableMethod =() => NetworkedIconManager.hideSelfIcon = false, toolTip = "Hides your icon from other players."},
 
                     new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
+                    new ButtonInfo { buttonText = "Test Ban", method = () => Main.BannedPrompt("Server", "Testing"), isTogglable = false}
                 };
                 Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
             }

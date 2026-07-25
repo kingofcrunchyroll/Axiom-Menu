@@ -96,6 +96,7 @@ namespace Seralyth
             Loader.AddComponent<CustomBoardManager>();
             Loader.AddComponent<UI>();
             Loader.AddComponent<NetworkedIconManager>();
+            Loader.AddComponent<FriendManager>();
             UnityEngine.Object.DontDestroyOnLoad(Loader);
 
             coroutineManager.StartCoroutine(PatchIntegrityCheck());
