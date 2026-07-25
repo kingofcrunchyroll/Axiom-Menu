@@ -505,7 +505,7 @@ namespace Seralyth.Mods
             {
                 if (blockedUsers.Contains(player.UserId))
                 {
-                    PhotonNetwork.Disconnect();
+                    Important.JoinRandom();
                     NotificationManager.SendNotification($"<color=grey>[</color><color=purple>ANNOYING MONKE</color><color=grey>]</color> Disconnected because {player.NickName} was in the room.", 6000);
                     return;
                 }

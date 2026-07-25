@@ -1749,12 +1749,16 @@ namespace Seralyth.Mods
 
         public static void ReverseGravity()
         {
-            GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 19.62f, ForceMode.Acceleration);
-            GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Euler(180f, 0f, 0f);
+            //GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 19.62f, ForceMode.Acceleration);
+            GTPlayer.Instance.SetGravityOverride(GTPlayer.Instance, p => p.AddForce(-Physics.gravity, ForceMode.Acceleration));
+            GTPlayerTransform.ApplyRotationOverride(Quaternion.Euler(180f, 0f, 0f), Time.frameCount);
         }
 
-        public static void UnflipCharacter() =>
-            GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.identity;
+        public static void UnflipCharacter()
+        {
+            GTPlayer.Instance.UnsetGravityOverride(GTPlayer.Instance);
+            GTPlayerTransform.ApplyRotationOverride(Quaternion.identity, Time.frameCount);
+        }
 
         private static readonly List<object[]> playerPositions = new List<object[]>();
         public static void Rewind()
@@ -2395,22 +2399,28 @@ namespace Seralyth.Mods
             }
         }
 
+        public static bool LegacySpiderWalk = false;
+        static Quaternion spiderRot;
+        static Quaternion tappedRot;
         public static void SpiderWalk()
         {
             if (GTPlayer.Instance.IsHandTouching(true) || GTPlayer.Instance.IsHandTouching(false))
             {
                 RaycastHit ray = GTPlayer.Instance.lastHitInfoHand;
-                walkPos = ray.point;
-                walkNormal = ray.normal;
+                Vector3 up = ray.normal.normalized;
+                Vector3 forward = Vector3.Cross(Vector3.right, up);
+                tappedRot = Quaternion.LookRotation(forward, up);
             }
 
-            if (walkPos != Vector3.zero)
-            {
-                GorillaTagger.Instance.rigidbody.AddForce(walkNormal * -9.81f, ForceMode.Acceleration);
-                GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Lerp(GTPlayer.Instance.GetControllerTransform(false).parent.rotation, Quaternion.LookRotation(walkNormal) * Quaternion.Euler(90f, 0f, 0f), Time.deltaTime);
-                //GTPlayerTransform.ApplyRotationOverride(Quaternion.Lerp(GTPlayerTransform.BodyRotation, Quaternion.LookRotation(walkNormal) * Quaternion.Euler(90f, 0f, 0f), Time.deltaTime), Time.frameCount);
-                ZeroGravity();
-            }
+            //if (LegacySpiderWalk)
+            //    GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Lerp(GTPlayer.Instance.GetControllerTransform(false).parent.rotation, Quaternion.LookRotation(walkNormal) * Quaternion.Euler(90f, 0f, 0f), Time.deltaTime);
+            //else
+            //{
+                float t = 1f - Mathf.Exp(-5f * Time.deltaTime);
+                spiderRot = Quaternion.Slerp(spiderRot, tappedRot, t);
+                GTPlayerTransform.ApplyRotationOverride(spiderRot, Time.frameCount);
+                GTPlayer.Instance.SetGravityOverride(GTPlayer.Instance, p => p.AddForce(spiderRot * Physics.gravity, ForceMode.Acceleration));
+            //}
         }
 
         static bool flipping;
@@ -2422,13 +2432,13 @@ namespace Seralyth.Mods
         public static void Flip()
         {
             bool silentFlip = Buttons.GetIndex("Silent Flip").enabled;
-            if (!flipping && (rightPrimary || rightSecondary) && VRRig.LocalRig.enabled)
+            if (!flipping && (leftSecondary || rightSecondary) && VRRig.LocalRig.enabled)
             {
                 if (GTPlayer.Instance.playerRigidBody)
                 {
                     flipping = true;
                     flipStart = Time.time;
-                    flipAxis = rightPrimary ? VRRig.LocalRig.transform.right : -VRRig.LocalRig.transform.right;
+                    flipAxis = leftSecondary ? VRRig.LocalRig.transform.right : -VRRig.LocalRig.transform.right;
                     flipFrom = GTPlayer.Instance?.playerRigidBody?.rotation ?? Quaternion.identity;
                 }
             }
@@ -2452,8 +2462,13 @@ namespace Seralyth.Mods
                 GTPlayerTransform.ApplyRotationOverride(rot, Time.frameCount);
         }
 
-        public static void SpiderCrawl() =>
-            GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
+        public static void SpiderCrawl()
+        {
+            Rotate(Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0));
+            VRRig.LocalRig.head.MapMine(VRRig.LocalRig.lastScaleFactor, VRRig.LocalRig.playerOffsetTransform);
+            VRRig.LocalRig.leftHand.MapMine(VRRig.LocalRig.lastScaleFactor, VRRig.LocalRig.playerOffsetTransform);
+            VRRig.LocalRig.rightHand.MapMine(VRRig.LocalRig.lastScaleFactor, VRRig.LocalRig.playerOffsetTransform);
+        }
 
         public static void TeleportToRandom()
         {

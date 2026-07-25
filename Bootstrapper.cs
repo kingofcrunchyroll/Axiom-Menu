@@ -29,6 +29,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using Axiom.Managers;
 
 namespace Seralyth
 {
@@ -94,9 +95,11 @@ namespace Seralyth
             Loader.AddComponent<NotificationManager>();
             Loader.AddComponent<CustomBoardManager>();
             Loader.AddComponent<UI>();
+            Loader.AddComponent<NetworkedIconManager>();
             UnityEngine.Object.DontDestroyOnLoad(Loader);
 
             coroutineManager.StartCoroutine(PatchIntegrityCheck());
+            RoleManager.StartPolling(coroutineManager);
         }
 
         private static IEnumerator PatchIntegrityCheck()

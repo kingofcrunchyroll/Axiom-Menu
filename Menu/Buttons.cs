@@ -339,12 +339,10 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Non-Togglable Ghost", toolTip = "Makes the ghost mod only activate when holding down the button."},
                 new ButtonInfo { buttonText = "Non-Togglable Invisible", toolTip = "Makes the invisible mod only activate when holding down the button"},
 
-                new ButtonInfo { buttonText = "Splash Intercourse", toolTip = "Splashes water when \"impacting\" another player with the intercourse gun."},
-                new ButtonInfo { buttonText = "Reverse Intercourse", toolTip = "Turns you into the receiver when using the intercourse gun."},
-
                 new ButtonInfo { buttonText = "Elevated Sticky Drive", toolTip = "Makes you float higher in the air whenever you use Sticky Drive."},
                 new ButtonInfo { buttonText = "High Quality Portals", toolTip = "Makes the view through the portals higher quality." },
-                new ButtonInfo { buttonText = "Silent Flip", toolTip = "<color=grey>[</color><color=purple>Ported From Seralyth</color><color=grey>]</color> Makes you backflip without rotating your camera."}
+                new ButtonInfo { buttonText = "Silent Flip", toolTip = "<color=grey>[</color><color=purple>Ported From Seralyth</color><color=grey>]</color> Makes you backflip without rotating your camera."},
+                //new ButtonInfo { buttonText = "Legacy Spider Monke", enableMethod = () => Movement.LegacySpiderWalk = true, disableMethod = () => Movement.LegacySpiderWalk = false, toolTip = "Uses the old method for Spider Walk"} // Removed due to buggy behaviour
             },
 
             new[] { // Projectile Settings [5]
@@ -1953,7 +1951,6 @@ namespace Seralyth.Menu
             "Chat Messages",
             "Macros",
             "Achievements",
-            "Mod List",
             "Patreon Mods",
             "Patreon Settings",
             "Voice Changers",

@@ -1,0 +1,160 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace Axiom.Managers
+{
+    // Who issued the blacklist entry, not a severity level
+    public enum IssuerRank
+    {
+        None,
+        Moderator,
+        Developer,
+        Server
+    }
+
+    public class BlacklistEntry
+    {
+        [JsonProperty("rank")]
+        public string Rank { get; set; }
+
+        [JsonProperty("reason")]
+        public string Reason { get; set; }
+    }
+
+    public class BlacklistFile
+    {
+        // Keyed by Photon UserId
+        [JsonProperty("userIds")]
+        public Dictionary<string, BlacklistEntry> UserIds { get; set; } = new Dictionary<string, BlacklistEntry>();
+    }
+
+    public static class BlacklistManager
+    {
+        // Raw GitHub content URL - swap "main" for your default branch name if different
+        private const string BlacklistUrl =
+            "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/main/blacklist.json";
+
+        private const float RefreshIntervalSeconds = 300f; // 5 minutes
+
+        private static Dictionary<string, BlacklistEntry> cachedEntries = new Dictionary<string, BlacklistEntry>();
+        private static bool isFetching;
+
+        public static IssuerRank GetRank(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return IssuerRank.None;
+
+            if (cachedEntries.TryGetValue(userId, out BlacklistEntry entry))
+            {
+                return entry.Rank switch
+                {
+                    "Server" => IssuerRank.Server,
+                    "Developer" => IssuerRank.Developer,
+                    "Moderator" => IssuerRank.Moderator,
+                    _ => IssuerRank.None
+                };
+            }
+
+            return IssuerRank.None;
+        }
+
+        public static string GetReason(string userId)
+        {
+            return cachedEntries.TryGetValue(userId, out BlacklistEntry entry) ? entry.Reason : null;
+        }
+
+        public static bool TryGetEntry(string userId, out IssuerRank rank, out string reason)
+        {
+            rank = GetRank(userId);
+            reason = GetReason(userId);
+            return cachedEntries.ContainsKey(userId);
+        }
+
+        // Endpoint for the Cloudflare Worker that handles authorized ban submissions.
+        // The client never has GitHub write access - the worker enforces who's allowed to ban.
+        private const string BanSubmitUrl = "https://axiom-ban-worker.<your-subdomain>.workers.dev";
+
+        // Call from your "Blacklist this player" button. requesterId should be your own
+        // PhotonNetwork.LocalPlayer.UserId - the worker checks that against its own
+        // authorized list server-side, so this isn't a trust-the-client situation.
+        public static IEnumerator SubmitBan(string requesterId, string targetUserId, string rank, string reason, Action<bool, string> onComplete = null)
+        {
+            var payload = JsonConvert.SerializeObject(new
+            {
+                requesterId,
+                targetUserId,
+                rank,
+                reason
+            });
+
+            using UnityWebRequest request = new UnityWebRequest(BanSubmitUrl, "POST");
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(payload);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            bool success = request.result == UnityWebRequest.Result.Success;
+            onComplete?.Invoke(success, success ? null : request.error);
+
+            if (success)
+            {
+                // Pull the fresh list immediately rather than waiting for the next poll tick -
+                // this is what makes it actually apply "mid-game" for the person who just banned.
+                yield return FetchOnce();
+            }
+        }
+
+        // Call once on startup (e.g. alongside RoleManager.StartPolling)
+        public static void StartPolling(MonoBehaviour host)
+        {
+            host.StartCoroutine(PollLoop());
+        }
+
+        private static IEnumerator PollLoop()
+        {
+            while (true)
+            {
+                yield return FetchOnce();
+                yield return new WaitForSeconds(RefreshIntervalSeconds);
+            }
+        }
+
+        public static IEnumerator FetchOnce()
+        {
+            if (isFetching)
+                yield break;
+
+            isFetching = true;
+
+            using UnityWebRequest request = UnityWebRequest.Get(BlacklistUrl);
+            request.SetRequestHeader("Cache-Control", "no-cache");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    var parsed = JsonConvert.DeserializeObject<BlacklistFile>(request.downloadHandler.text);
+                    cachedEntries = parsed?.UserIds ?? new Dictionary<string, BlacklistEntry>();
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError($"[BlacklistManager] Failed to parse blacklist.json: {e}");
+                }
+            }
+            else
+            {
+                UnityEngine.Debug.LogError($"[BlacklistManager] Blacklist fetch failed: {request.error}");
+            }
+
+            isFetching = false;
+        }
+    }
+}
