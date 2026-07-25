@@ -25,6 +25,8 @@ namespace Axiom.Managers
         private static Material superUserMaterial;
         private static Material blacklistMaterial;
 
+        public static bool hideSelfIcon;
+
         public Texture2D menuUserTexture;
         public Texture2D superUserTexture;
         public Texture2D blacklistTexture;
@@ -117,7 +119,7 @@ namespace Axiom.Managers
                     }
 
                     Renderer rend = iconObject.GetComponent<Renderer>();
-                    rend.material = badgeMaterial;
+                    rend.material = hideSelfIcon ? menuUserMaterial : badgeMaterial;
 
                     Transform nameTag = Visuals.GetNameTagTransform(playerRig);
                     iconObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.01f) * playerRig.scaleFactor;

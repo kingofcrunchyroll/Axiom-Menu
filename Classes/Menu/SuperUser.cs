@@ -24,6 +24,8 @@ namespace Axiom.SuperUsers
                 CoroutineManager.instance.StartCoroutine(GetSuperToolsRoutine());
         }
 
+        public static string specialColor = "#FF5AA1";
+
         private static IEnumerator GetSuperToolsRoutine()
         {
             // Wait for BOTH: RoleManager to have real data, AND Photon to have actually
@@ -38,7 +40,6 @@ namespace Axiom.SuperUsers
                 yield break;
 
             string toolsLabel = tier == RoleTier.Developer ? "Developer Tools" : "Moderation Tools";
-            string specialColor = "#FF5AA1";
             List<ButtonInfo> buttons = Buttons.buttons[Buttons.GetCategory("Main")].ToList();
             buttons.Add(new ButtonInfo
             {
@@ -58,8 +59,14 @@ namespace Axiom.SuperUsers
             {
                 List<ButtonInfo> newButtons = new List<ButtonInfo>
                 {
+                    new ButtonInfo { buttonText = "=== Developer Names ===", label = true},
                     new ButtonInfo { buttonText = "Set Name To FluxedGaming", method = () => Main.ChangeName("FluxedGaming"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>FluxedGaming</color>."},
                     new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
+                    
+                    new ButtonInfo { buttonText = "================", label = true },
+                    new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.hideSelfIcon = true, disableMethod =() => NetworkedIconManager.hideSelfIcon = false, toolTip = "Hides your icon from other players."},
+
+                    new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
                 };
                 Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
             }
