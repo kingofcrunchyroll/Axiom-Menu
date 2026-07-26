@@ -36,7 +36,7 @@ namespace Axiom.SuperUsers
 
             string userId = PhotonNetwork.LocalPlayer.UserId;
             RoleTier tier = RoleManager.GetRoleTier(userId);
-            if (tier != RoleTier.Developer && tier != RoleTier.SuperUser)
+            if (tier != RoleTier.Developer && tier != RoleTier.SuperUser && tier != RoleTier.Moderator)
                 yield break;
 
             string toolsLabel = tier == RoleTier.Developer ? "Developer Tools" : "Moderation Tools";
@@ -64,10 +64,11 @@ namespace Axiom.SuperUsers
                     new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
                     
                     new ButtonInfo { buttonText = "================", label = true },
-                    new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.hideSelfIcon = true, disableMethod =() => NetworkedIconManager.hideSelfIcon = false, toolTip = "Hides your icon from other players."},
+                    new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
 
                     new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
-                    new ButtonInfo { buttonText = "Test Ban", method = () => Main.BannedPrompt("Server", "Testing"), isTogglable = false}
+                    new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
+                    new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false }
                 };
                 Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
             }

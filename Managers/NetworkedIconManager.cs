@@ -1,18 +1,21 @@
-using System.Collections.Generic;
-using System.Linq;
 using Axiom.Managers;
+using ExitGames.Client.Photon;
 using GorillaLocomotion;
+using GorillaNetworking;
 using Photon.Pun;
 using Photon.Realtime;
+using Seralyth;
+using Seralyth.Classes;
+using Seralyth.Classes.Menu;
+using Seralyth.Mods;
+using Seralyth.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Seralyth;
-using Seralyth.Utilities;
-using Seralyth.Classes.Menu;
 using static Seralyth.Utilities.AssetUtilities;
 using static Seralyth.Utilities.FileUtilities;
 using static Seralyth.Utilities.RigUtilities;
-using Seralyth.Mods;
 
 namespace Axiom.Managers
 {
@@ -25,6 +28,9 @@ namespace Axiom.Managers
         private static Material superUserMaterial;
         private static Material blacklistMaterial;
 
+        // Local mirror of the "HideSelfIcon" Photon custom property - kept as a real field
+        // (not just read-on-demand) so UI toggles can check current state cheaply. The setter
+        // is what actually broadcasts it; setting this field directly elsewhere won't propagate.
         public static bool hideSelfIcon;
 
         public Texture2D menuUserTexture;
@@ -38,6 +44,29 @@ namespace Axiom.Managers
             superUserTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/stick.png", "stick.png");
             blacklistTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/warning.png", "warning.png");
             developerTexture = SafeLoadURL($"{ServerData.AssetURL}/crown.png", "crown.png");
+
+            // Custom properties are per-room in Photon, so re-broadcast on every join rather
+            // than once at startup - same pattern FriendManager already uses for its own check.
+            NetworkSystem.Instance.OnJoinedRoomEvent += BroadcastSelfState;
+        }
+
+        // Call this from your "Hide My Badge" button instead of setting hideSelfIcon directly -
+        // this is what actually syncs the value to everyone else's client.
+        public static void SetHideSelfIcon(bool value)
+        {
+            hideSelfIcon = value;
+            if (PhotonNetwork.InRoom)
+                BroadcastSelfState();
+        }
+
+        private static void BroadcastSelfState()
+        {
+            var props = new Hashtable
+            {
+                { "HasAxiom", true },
+                { "HideSelfIcon", hideSelfIcon }
+            };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
         private static Texture2D SafeLoadResource(string resourcePath)
@@ -65,9 +94,6 @@ namespace Axiom.Managers
                 return null;
             }
         }
-
-        // How far above the nametag the icon floats, scaled by the target's own rig scale
-        private const float IndicatorDistance = 0.35f;
 
         public void Update()
         {
@@ -119,11 +145,10 @@ namespace Axiom.Managers
                     }
 
                     Renderer rend = iconObject.GetComponent<Renderer>();
-                    rend.material = hideSelfIcon ? menuUserMaterial : badgeMaterial;
+                    rend.material = badgeMaterial;
 
-                    Transform nameTag = Visuals.GetNameTagTransform(playerRig);
-                    iconObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.01f) * playerRig.scaleFactor;
-                    iconObject.transform.position = nameTag.position + nameTag.up * (IndicatorDistance * playerRig.scaleFactor);
+                    iconObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.01f) * playerRig.scaleFactor;
+                    iconObject.transform.position = playerRig.headMesh.transform.position + playerRig.headMesh.transform.up * (ConsoleStub.GetIndicatorDistance(playerRig) * playerRig.scaleFactor);
                     iconObject.transform.LookAt(GorillaTagger.Instance.headCollider.transform.position);
                 }
             }
@@ -131,7 +156,8 @@ namespace Axiom.Managers
         }
 
         // Returns the material to use for this player's badge, or null if they get no badge at all.
-        // Blacklist takes priority over role badges - a blacklisted dev/mod is still shown as blacklisted.
+        // Blacklist takes priority over role badges - a blacklisted dev/mod is still shown as
+        // blacklisted even if they've also toggled HideSelfIcon.
         private Material GetBadgeState(Player player)
         {
             if (BlacklistManager.TryGetEntry(player.UserId, out _, out _))
@@ -140,13 +166,23 @@ namespace Axiom.Managers
                 return blacklistMaterial;
             }
 
+            bool theyHideTheirIcon = player.CustomProperties.TryGetValue("HideSelfIcon", out object hideVal) && hideVal is bool hidden && hidden;
+            if (theyHideTheirIcon)
+                return null;
+
             RoleTier tier = RoleManager.GetRoleTier(player.UserId);
+
+            // Self-reported, unlike Moderator/Developer which only ever come from the
+            // trusted SuperUsers.json - don't let this override a real trusted tier.
+            if (tier == RoleTier.None && player.CustomProperties.TryGetValue("HasAxiom", out object hasAxiomVal) && hasAxiomVal is bool hasAxiom && hasAxiom)
+                tier = RoleTier.MenuUser;
+
             switch (tier)
             {
                 case RoleTier.Developer:
                     EnsureMaterial(ref superUserMaterial, developerTexture);
                     return superUserMaterial;
-                case RoleTier.SuperUser:
+                case RoleTier.Moderator:
                     EnsureMaterial(ref superUserMaterial, superUserTexture);
                     return superUserMaterial;
                 case RoleTier.MenuUser:

@@ -42,6 +42,13 @@ namespace Axiom.Managers
         private static Dictionary<string, BlacklistEntry> cachedEntries = new Dictionary<string, BlacklistEntry>();
         private static bool isFetching;
 
+        // True once the first fetch attempt has completed (success or failure)
+        public static bool HasFetchedOnce { get; private set; }
+
+        // Distinguishes "we confirmed the current server state" from "we tried and failed" -
+        // don't let anything treat isFetching==done as the same thing as a trustworthy result.
+        public static bool LastFetchSucceeded { get; private set; }
+
         public static IssuerRank GetRank(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -139,18 +146,22 @@ namespace Axiom.Managers
                 {
                     var parsed = JsonConvert.DeserializeObject<BlacklistFile>(request.downloadHandler.text);
                     cachedEntries = parsed?.UserIds ?? new Dictionary<string, BlacklistEntry>();
+                    LastFetchSucceeded = true;
                 }
                 catch (Exception e)
                 {
                     UnityEngine.Debug.LogError($"[BlacklistManager] Failed to parse blacklist.json: {e}");
+                    LastFetchSucceeded = false;
                 }
             }
             else
             {
                 UnityEngine.Debug.LogError($"[BlacklistManager] Blacklist fetch failed: {request.error}");
+                LastFetchSucceeded = false;
             }
 
             isFetching = false;
+            HasFetchedOnce = true;
         }
     }
 }

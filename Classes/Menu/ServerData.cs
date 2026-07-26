@@ -61,8 +61,6 @@ namespace Seralyth.Classes.Menu
             // { "Placeholder Admin UserID", "Placeholder Admin Name" },
         };
 
-        public static void SetupAdminPanel(string playername) => // Method used to spawn admin panel
-            Main.SetupAdminPanel(playername);
         #endregion
 
         #region Server Data Code

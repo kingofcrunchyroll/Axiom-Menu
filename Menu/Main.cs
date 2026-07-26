@@ -4271,9 +4271,10 @@ namespace Seralyth.Menu
             Prompt($"A new version is available ({versionArchive}). Would you like to update?", Settings.UpdateMenu);
         }
 
-        public static void BannedPrompt(string issuer, string reason)
+        public static void BannedPrompt(string issuer, string reason, bool test = false)
         {
-            PromptSingle($"You have been Banned from using Axiom.\n\nBan Reason: {reason}\nIssuer: {issuer}\n\n(You can try to make an appeal in the Discord.)", () => /*Lockdown = true*/Buttons.CurrentCategoryName = "SuperUser Tools");
+            NotificationManager.SendNotification($"<color=grey[</color><color=red>BANNED</color><color=grey]</color> You have been <color=red>Banned</color> from using Axiom for {reason}. You have been banned by an Axiom {issuer}.", 10000);
+            PromptSingle($"You have been Banned from using Axiom.\n\nBan Reason: {reason}\nIssuer: {issuer}\n\n(You can try to make an appeal in the Discord.)", () => { if (test) Buttons.CurrentCategoryName = "SuperUser Tools"; else Lockdown = true; });
         }
 
         public static readonly Dictionary<(Color, Color), Texture2D> cacheGradients = new Dictionary<(Color, Color), Texture2D>();
@@ -4997,17 +4998,6 @@ namespace Seralyth.Menu
             CoroutineManager.instance.StartCoroutine(TranscribeText(text, t => Sound.PlayAudio(t, disableMicrophone)));
 
         public static bool isAdmin;
-        public static void SetupAdminPanel(string playername)
-        {
-            if (dynamicSounds)
-                LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Menu/admin.ogg", "Audio/Menu/admin.ogg", clip => clip.Play(buttonClickVolume / 10f));
-
-            List<ButtonInfo> buttons = Buttons.buttons[Buttons.GetCategory("Main")].ToList();
-            buttons.Add(new ButtonInfo { buttonText = "Admin Mods", method = () => Buttons.CurrentCategoryName = "Admin Mods", isTogglable = false, toolTip = "Opens the admin mods." });
-            Buttons.buttons[Buttons.GetCategory("Main")] = buttons.ToArray();
-            NotificationManager.SendNotification($"<color=grey>[</color><color=purple>{(playername == "kingofnetflix" ? "OWNER" : "ADMIN")}</color><color=grey>]</color> Welcome, {playername}! Admin mods have been enabled.", 10000);
-            isAdmin = true;
-        }
 
         public static string[] InfosToStrings(ButtonInfo[] array) =>
             array.Select(button => button.buttonText).ToArray();

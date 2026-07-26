@@ -420,6 +420,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Bypass Join Room Type", enableMethod =() => JoinedRoomPatch.enabled = true, disableMethod =() => JoinedRoomPatch.enabled = false, toolTip = "Bypasses the immediate disconnection when trying to join a room that is in another map."},
 
                 new ButtonInfo { buttonText = "Auto Join Room", method =() => PromptText("What room would you like to join?", () => Important.QueueRoom(keyboardInput), null, "Done", "Cancel"), isTogglable = false, toolTip = "Automatically attempts to connect to whatever room you desire every couple of seconds until connected.", legal = true},
+                new ButtonInfo { buttonText = "Avoid Same Room", overlapText = "Ensure New Room", method =() => Important.AvoidSameRoom(), toolTip = "Avoids joining the same room when trying to hop servers.", legal = true}
             },
 
             new[] { // Important Mods [7]
@@ -1915,6 +1916,15 @@ namespace Seralyth.Menu
             new[] // SuperUser Tools
             {
                 new ButtonInfo { buttonText = "Exit Super User Tools", method =() => CurrentCategoryName = "Main", isTogglable = false, toolTip = "Returns you back to the main page."},
+            },
+
+            new []
+            {
+                new ButtonInfo { buttonText = "Exit Voice Settings", method =() => CurrentCategoryName = "Main", isTogglable = false, toolTip = "Returns you back to the main page."},
+                new ButtonInfo { buttonText = "Set Open Mic", overlapText = "Set Mic to <color=grey>[</color><color=green>Open Mic</color><color=grey>]</color>", method =() => GorillaComputer.instance.pttType = "OPEN MIC", isTogglable = false, toolTip = "Set's your microphone setting to <color=grey>[</color><color=green>Open Mic</color><color=grey>]</color>." },
+                new ButtonInfo { buttonText = "Set PTT Mic", overlapText = "Set Mic to <color=grey>[</color><color=green>Push To Talk</color><color=grey>]</color>", method =() => GorillaComputer.instance.pttType = "PUSH TO TALK", isTogglable = false, toolTip = "Set's your microphone setting to <color=grey>[</color><color=green>Push To Talk</color><color=grey>]</color>." },
+                new ButtonInfo { buttonText = "Set PTM Mic", overlapText = "Set Mic to <color=grey>[</color><color=green>Push To Mute</color><color=grey>]</color>", method =() => GorillaComputer.instance.pttType = "PUSH TO MUTE", isTogglable = false, toolTip = "Set's your microphone setting to <color=grey>[</color><color=green>Push To Mute</color><color=grey>]</color>." },
+                new ButtonInfo { buttonText = "Disable Voice", overlapText = "Disable Voice", enableMethod =() => {GorillaComputer.instance.voiceChatOn = "FALSE"; Buttons.GetIndex("Disable Voice").overlapText = "Enable Voice"; }, disableMethod =() => {GorillaComputer.instance.voiceChatOn = "TRUE"; Buttons.GetIndex("Disable Voice").overlapText = "Disable Voice"; }, toolTip = "Disables Voice Chat making everyone including you sound like a monke." }
             }
         };
 
@@ -1962,7 +1972,8 @@ namespace Seralyth.Menu
             "Patreon Settings",
             "Voice Changers",
             "Sound Properties",
-            "SuperUser Tools"
+            "SuperUser Tools",
+            "Voice Settings"
         };
 
         public static int _currentCategoryIndex;

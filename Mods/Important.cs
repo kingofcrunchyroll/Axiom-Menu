@@ -251,6 +251,12 @@ namespace Seralyth.Mods
             JoinRandom();
         }
 
+        public static void AvoidSameRoom()
+        {
+            if (PhotonNetwork.CurrentRoom.Name == lastRoom)
+                JoinRandom();
+        }
+
         public static async Task ForceCreateRoom(string name, RoomConfig options)
         {
             if (NetworkSystem.Instance.InRoom)

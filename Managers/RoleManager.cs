@@ -12,6 +12,7 @@ namespace Axiom.Managers
         None,
         MenuUser,
         SuperUser,
+        Moderator,
         Developer
     }
 
@@ -56,9 +57,9 @@ namespace Axiom.Managers
                 return entry.Tier switch
                 {
                     "Developer" => RoleTier.Developer,
+                    "Moderator" => RoleTier.Moderator,
                     "SuperUser" => RoleTier.SuperUser,
-                    "MenuUser" => RoleTier.MenuUser,
-                    _ => RoleTier.None
+                    _ => RoleTier.MenuUser
                 };
             }
 
