@@ -5660,10 +5660,17 @@ namespace Seralyth.Menu
             return input;
         }
 
+        public static bool avoidSameRoom;
         private static void OnJoinRoom()
         {
             if (inRoomStatus)
                 return;
+
+            if (avoidSameRoom)
+            {
+                if (PhotonNetwork.CurrentRoom.Name == lastRoom)
+                    Important.JoinRandom();
+            }
 
             inRoomStatus = true;
             lastRoom = PhotonNetwork.CurrentRoom.Name;

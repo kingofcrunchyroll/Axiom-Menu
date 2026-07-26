@@ -421,7 +421,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Bypass Join Room Type", enableMethod =() => JoinedRoomPatch.enabled = true, disableMethod =() => JoinedRoomPatch.enabled = false, toolTip = "Bypasses the immediate disconnection when trying to join a room that is in another map."},
 
                 new ButtonInfo { buttonText = "Auto Join Room", method =() => PromptText("What room would you like to join?", () => Important.QueueRoom(keyboardInput), null, "Done", "Cancel"), isTogglable = false, toolTip = "Automatically attempts to connect to whatever room you desire every couple of seconds until connected.", legal = true},
-                new ButtonInfo { buttonText = "Avoid Same Room", overlapText = "Ensure New Room", method =() => Important.AvoidSameRoom(), toolTip = "Avoids joining the same room when trying to hop servers.", legal = true}
+                new ButtonInfo { buttonText = "Avoid Same Room", overlapText = "Ensure New Room", enableMethod =() => avoidSameRoom = true, disableMethod =() => avoidSameRoom = false, toolTip = "Avoids joining the same room when trying to hop servers.", legal = true}
             },
 
             new[] { // Important Mods [7]
@@ -1538,7 +1538,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "End Shift", method = Fun.EndShift, isTogglable = false, toolTip = "Ends the current ghost reactor shift."},
                 new ButtonInfo { buttonText = "Set Quota", method = Fun.SetQuota, toolTip = "Meets the quota for you."},
 
-                new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+                
 
                 new ButtonInfo { buttonText = "Rise Lava", method =() => Overpowered.ChangeLavaState(InfectionLavaController.RisingLavaState.Rising), isTogglable = false, toolTip = "Raises the lava in the forest lava map."},
                 new ButtonInfo { buttonText = "Flood Lava", method =() => Overpowered.ChangeLavaState(InfectionLavaController.RisingLavaState.Full), isTogglable = false, toolTip = "Makes the lava in the forest lava map at the top."},
