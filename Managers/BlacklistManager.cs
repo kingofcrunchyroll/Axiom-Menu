@@ -82,7 +82,7 @@ namespace Axiom.Managers
 
         // Endpoint for the Cloudflare Worker that handles authorized ban submissions.
         // The client never has GitHub write access - the worker enforces who's allowed to ban.
-        private const string BanSubmitUrl = "https://axiom-ban-worker.<your-subdomain>.workers.dev";
+        private const string BanSubmitUrl = "https://axiom-ban-worker.fluxedgaming421.workers.dev/";
 
         // authorized list server-side, so this isn't a trust-the-client situation.
         public static IEnumerator SubmitBan(string requesterId, string targetUserId, string rank, string reason, Action<bool, string> onComplete = null)
