@@ -25,9 +25,9 @@ namespace Seralyth
     {
         public const string GUID = "org.fluxed.gorillatag.axiommenu";
         public const string Name = "Axiom Menu";
-        public const string Description = "The 'More Legal' Seralyth";
+        public const string Description = "The 'More Legal' Seralyth, A Mod Menu built to Entertain.";
         public const string BuildTimestamp = "2026-07-08T15:58:08Z";
-        public const string Version = "1.4.7";
+        public const string Version = "1.4.9";
 
         public const string BaseDirectory =
 #if LEGAL || LEGAL_DEBUG

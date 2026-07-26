@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Axiom.Managers;
 using GorillaExtensions;
 using GorillaLocomotion;
 using Meta.Voice.Logging;
@@ -196,8 +197,8 @@ namespace Seralyth.Mods
 
         public static void MergePreferences_iisStupidMenu()
         {
-            string directoryToUse = "iisStupidMenu";
-            string preferences = "iiMenu_Preferences.txt";
+            string directoryToUse = "SeralythMenu";
+            string preferences = "Seralyth_Preferences.txt";
 
             if (!Directory.Exists(directoryToUse))
                 return;
@@ -255,7 +256,7 @@ namespace Seralyth.Mods
 
             LoadPreferences();
             Sound.LoadSoundboard(false);
-            NotificationManager.SendNotification("<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Successfully completed merge. Have fun using Seralyth Menu!");
+            NotificationManager.SendNotification("<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Successfully completed merge. Have fun using Axiom!");
         }
 
         public static void UpdateSoundPreferences()
@@ -707,6 +708,12 @@ namespace Seralyth.Mods
                         }
                     }
                 );
+            }
+
+            string localUserId = PhotonNetwork.LocalPlayer.UserId;
+            if (RoleManager.GetRoleTier(localUserId) == RoleTier.Moderator || RoleManager.GetRoleTier(localUserId) == RoleTier.Developer)
+            {
+                buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => PromptText("Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput)), AcceptButton: "Ban", DeclineButton: "Cancel"), toolTip = $"Bans {targetName} from Axiom" });
             }
 
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();

@@ -94,8 +94,8 @@ namespace Seralyth.Menu
 #if LEGAL || LEGAL_DEBUG
             // "illegal" seralyth -> "legal" seralyth preferences merge here
 #else
-            if (Bootstrapper.FirstLaunch && Directory.Exists("iisStupidMenu"))
-                Prompt("It seems like you have used ii's Stupid Menu before! Would you like to move all your enabled mods, settings and sounds to Seralyth Menu?", Settings.MergePreferences_iisStupidMenu);
+            if (Bootstrapper.FirstLaunch && Directory.Exists("SeralythMenu"))
+                Prompt("It seems like you have used Seralyth before! Would you like to move all your enabled mods, settings and sounds to Seralyth Menu?", Settings.MergePreferences_iisStupidMenu);
 #endif
             //if (Plugin.FirstLaunch)
             //    Prompt("It seems like this is your first time using the menu. Would you like to watch a quick tutorial to get to know how to use it?", Settings.ShowTutorial);
