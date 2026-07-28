@@ -667,9 +667,9 @@ namespace Seralyth.Mods
 
         private static float lastPress;
         private const float debounce = 0.25f;
+        private static bool flag = false;
         public static void ThirdPersonCamera()
         {
-            bool flag = false;
             if (Main.leftSecondary)
             {
                 if (Time.time - lastPress < debounce)

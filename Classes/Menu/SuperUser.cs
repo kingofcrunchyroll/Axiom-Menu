@@ -39,18 +39,31 @@ namespace Axiom.SuperUsers
             if (tier != RoleTier.Developer && tier != RoleTier.SuperUser && tier != RoleTier.Moderator)
                 yield break;
 
-            string toolsLabel = tier == RoleTier.Developer ? "Developer Tools" : "Moderation Tools";
+            string toolsLabel = tier switch
+            {
+                RoleTier.Developer => "Developer Tools",
+                RoleTier.Moderator => "Moderator Tools",
+                RoleTier.SuperUser => "Super User Mods",
+                _ => null
+            };
+
             List<ButtonInfo> buttons = Buttons.buttons[Buttons.GetCategory("Main")].ToList();
             buttons.Add(new ButtonInfo
             {
                 buttonText = $"{toolsLabel}",
                 method = () => Buttons.CurrentCategoryName = "SuperUser Tools",
                 isTogglable = false,
-                toolTip = "Opens the Super User Tools."
+                toolTip = $"Opens the {toolsLabel}."
             });
             Buttons.buttons[Buttons.GetCategory("Main")] = buttons.ToArray();
 
-            string roleLabel = tier == RoleTier.Developer ? "DEVELOPER" : "MODERATOR";
+            string roleLabel = tier switch
+            {
+                RoleTier.Developer => "DEVELOPER",
+                RoleTier.Moderator => "MODERATOR",
+                RoleTier.SuperUser => "SUPER USER",
+                _ => null
+            };
             NotificationManager.SendNotification(
                 $"<color=grey>[</color><color={specialColor}>{roleLabel}</color><color=grey>]</color> Welcome, {RoleManager.GetDisplayName(userId)}! {toolsLabel} have been enabled.",
                 10000);
@@ -83,6 +96,7 @@ namespace Axiom.SuperUsers
                     {
                         new ButtonInfo { buttonText = "Hide Moderator Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
+                        new ButtonInfo{ buttonText = "Not sure what else to put in here yet :/", label = true}
                     };
                         Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
                         break;
