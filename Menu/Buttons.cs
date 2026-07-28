@@ -892,7 +892,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Keyboard Tracker", enableMethod = Fun.EnableKeyboardTracker, method = Fun.KeyboardTracker, disableMethod = Fun.DisableKeyboardTracker, toolTip = "Tracks everyone's keyboard inputs in the lobby."},
 
                 new ButtonInfo { buttonText = "Free Camera <color=grey>[</color><color=green>J</color><color=grey>]</color>", postMethod = Fun.Freecam, disableMethod = Fun.DisableFreecam, toolTip = "Exit your own body and fly around to your free will.", legal = true},
-                new ButtonInfo { buttonText = "Third Person Camera", postMethod = Fun.ThirdPersonCamera, disableMethod = Fun.DisableFreecam, toolTip = "Moves your camera to behind your head."},
+                new ButtonInfo { buttonText = "Third Person Camera", overlapText = "Third Person Camera <color=grey>[</color><color=green>Y</color><color=grey>]</color>", postMethod = Fun.ThirdPersonCamera, disableMethod = Fun.DisableFreecam, toolTip = "Moves your camera to behind your head."},
                 new ButtonInfo { buttonText = "Flip Camera", postMethod = Fun.FlipCamera, disableMethod = Fun.DisableFreecam, toolTip = "Flips your camera 180 degrees."},
                 new ButtonInfo { buttonText = "Camera FOV", postMethod = Fun.CameraFOV, disableMethod = Fun.FixCameraFOV, toolTip = "Changes the FOV of your PC camera.", legal = true},
                 new ButtonInfo { buttonText = "Spectate Gun", postMethod = Fun.SpectateGun, disableMethod = Fun.DisableFreecam, toolTip = "Lets you see through the eyes of whoever your hand desires."},

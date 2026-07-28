@@ -330,7 +330,7 @@ namespace Seralyth.Mods
 
             string restartScript = @"@echo off
 title Axiom Menu - Restarting Gorilla Tag
-color 5
+color C
 
 cls
 echo." + logoLines + @"
@@ -372,7 +372,7 @@ exit";
         {
             if (discord == null)
             {
-                discord = new DiscordRpcClient("1396080212441042944")
+                discord = new DiscordRpcClient("1531292579587559484")
                 {
                     Logger = new Managers.DiscordRPC.Logging.DiscordLogManager()
                 };
@@ -407,7 +407,7 @@ exit";
                     State = inRoom ? $"Room: {roomName} ({PhotonNetwork.PlayerList.Length}/{PhotonNetwork.CurrentRoom.MaxPlayers})" : "Not in a room",
                     Assets = new Managers.DiscordRPC.Assets
                     {
-                        LargeImageKey = "cone",
+                        LargeImageKey = "gizmo",
                         LargeImageText = "Axiom Menu",
                         SmallImageKey = inRoom ? "online" : "offline",
                         SmallImageText = inRoom ? "Online" : "Offline"

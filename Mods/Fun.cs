@@ -55,6 +55,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 using UnityEngine.Windows.Speech;
 using static Seralyth.Menu.Main;
 using static Seralyth.Utilities.AssetUtilities;
@@ -664,20 +665,37 @@ namespace Seralyth.Mods
             FreeCamObject.transform.rotation = GorillaTagger.Instance.headCollider.transform.rotation;
         }
 
+        private static float lastPress;
+        private const float debounce = 0.25f;
         public static void ThirdPersonCamera()
         {
-            if (FreeCamObject == null)
+            bool flag = false;
+            if (Main.leftSecondary)
             {
-                FreeCamObject = new GameObject("Seralyth_CameraObj");
-                FreeCamObject.transform.position = GorillaTagger.Instance.headCollider.transform.position;
+                if (Time.time - lastPress < debounce)
+                    return;
+                lastPress = Time.time;
+                flag = !flag;
             }
+            if (flag)
+            {
+                if (FreeCamObject == null)
+                {
+                    FreeCamObject = new GameObject("Seralyth_CameraObj");
+                    FreeCamObject.transform.position = GorillaTagger.Instance.headCollider.transform.position;
+                }
 
-            Camera FreeCamera = FreeCamObject.GetOrAddComponent<Camera>();
-            FreeCamera.nearClipPlane = 0.01f;
-            FreeCamera.cameraType = CameraType.Game;
+                Camera FreeCamera = FreeCamObject.GetOrAddComponent<Camera>();
+                FreeCamera.nearClipPlane = 0.01f;
+                FreeCamera.cameraType = CameraType.Game;
 
-            FreeCamObject.transform.position = GorillaTagger.Instance.bodyCollider.transform.TransformPoint(new Vector3(0f, 0.5f, -1.5f));
-            FreeCamObject.transform.rotation = GorillaTagger.Instance.headCollider.transform.rotation;
+                FreeCamObject.transform.position = GorillaTagger.Instance.bodyCollider.transform.TransformPoint(new Vector3(0f, 0.5f, -1.5f));
+                FreeCamObject.transform.rotation = GorillaTagger.Instance.headCollider.transform.rotation;
+            }
+            else
+            {
+                DisableFreecam();
+            }
         }
 
         public static void FlipCamera()

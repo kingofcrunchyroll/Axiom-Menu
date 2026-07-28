@@ -11,6 +11,7 @@ using Seralyth.Mods;
 using Seralyth.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Rendering;
 using static Seralyth.Utilities.AssetUtilities;
@@ -32,16 +33,19 @@ namespace Axiom.Managers
         // (not just read-on-demand) so UI toggles can check current state cheaply. The setter
         // is what actually broadcasts it; setting this field directly elsewhere won't propagate.
         public static bool hideSelfIcon;
+        public static bool showSelfIcon; // lets you see your own icon
 
         public Texture2D menuUserTexture;
         public Texture2D superUserTexture;
+        public Texture2D moderatorTexture;
         public Texture2D blacklistTexture;
         public Texture2D developerTexture;
 
         public void Awake()
         {
             menuUserTexture = SafeLoadResource($"{PluginInfo.ClientResourcePath}.icon.png");
-            superUserTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/stick.png", "stick.png");
+            superUserTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/superuser.png", "superuser.png");
+            moderatorTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/moderator.png", "moderator.png");
             blacklistTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/warning.png", "warning.png");
             developerTexture = SafeLoadURL($"{ServerData.AssetURL}/crown.png", "crown.png");
 
@@ -118,6 +122,7 @@ namespace Axiom.Managers
                                            || !VRRigCache.ActiveRigs.Contains(rig)
                                            || player == null
                                            || GetBadgeState(player) == null
+                                           || (player.IsLocal && !showSelfIcon)
                                         select rig).ToList();
 
                 foreach (VRRig rig in toRemove)
@@ -168,7 +173,10 @@ namespace Axiom.Managers
 
             bool theyHideTheirIcon = player.CustomProperties.TryGetValue("HideSelfIcon", out object hideVal) && hideVal is bool hidden && hidden;
             if (theyHideTheirIcon)
-                return null;
+            {
+                EnsureMaterial(ref menuUserMaterial, menuUserTexture);
+                return menuUserMaterial;
+            }
 
             RoleTier tier = RoleManager.GetRoleTier(player.UserId);
 
@@ -183,6 +191,9 @@ namespace Axiom.Managers
                     EnsureMaterial(ref superUserMaterial, developerTexture);
                     return superUserMaterial;
                 case RoleTier.Moderator:
+                    EnsureMaterial(ref superUserMaterial, moderatorTexture);
+                    return superUserMaterial;
+                case RoleTier.SuperUser:
                     EnsureMaterial(ref superUserMaterial, superUserTexture);
                     return superUserMaterial;
                 case RoleTier.MenuUser:

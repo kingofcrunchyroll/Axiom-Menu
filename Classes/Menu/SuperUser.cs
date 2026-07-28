@@ -55,23 +55,38 @@ namespace Axiom.SuperUsers
                 $"<color=grey>[</color><color={specialColor}>{roleLabel}</color><color=grey>]</color> Welcome, {RoleManager.GetDisplayName(userId)}! {toolsLabel} have been enabled.",
                 10000);
 
-            if (tier == RoleTier.Developer)
+            switch (tier)
             {
-                List<ButtonInfo> newButtons = new List<ButtonInfo>
-                {
-                    new ButtonInfo { buttonText = "=== Developer Names ===", label = true},
-                    new ButtonInfo { buttonText = "Set Name To FluxedGaming", method = () => Main.ChangeName("FluxedGaming"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>FluxedGaming</color>."},
-                    new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
-                    
-                    new ButtonInfo { buttonText = "================", label = true },
-                    new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
-                    new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+                case RoleTier.Developer:
+                    {
+                        List<ButtonInfo> newButtons = new List<ButtonInfo>
+                    {
+                        new ButtonInfo { buttonText = "=== Developer Names ===", label = true},
+                        new ButtonInfo { buttonText = "Set Name To FluxedGaming", method = () => Main.ChangeName("FluxedGaming"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>FluxedGaming</color>."},
+                        new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
 
-                    new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
-                    new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
-                    new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false }
-                };
-                Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
+                        new ButtonInfo { buttonText = "================", label = true },
+                        new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
+                        new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
+                        new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+
+                        new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
+                        new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
+                        new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false }
+                    };
+                        Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
+                        break;
+                    }
+                case RoleTier.Moderator:
+                    {
+                        List<ButtonInfo> newButtons = new List<ButtonInfo>
+                    {
+                        new ButtonInfo { buttonText = "Hide Moderator Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
+                        new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
+                    };
+                        Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
+                        break;
+                    }
             }
         }
     }

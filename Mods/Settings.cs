@@ -628,13 +628,6 @@ namespace Seralyth.Mods
                     legal = true
                 },
 
-                new ButtonInfo
-                {
-                    buttonText = "<color=grey>[</color><color=red>WARNING</color><color=grey>]</color> PRESSING THE BUTTON ABOVE WILL <color=red><b>KICK</b></color> YOU",
-                    label = true,
-                    legal = true
-                },
-
                 new ButtonInfo {
                     buttonText = "Teleport to Player",
                     overlapText = $"Teleport to {targetName}",
@@ -713,7 +706,7 @@ namespace Seralyth.Mods
             string localUserId = PhotonNetwork.LocalPlayer.UserId;
             if (RoleManager.GetRoleTier(localUserId) == RoleTier.Moderator || RoleManager.GetRoleTier(localUserId) == RoleTier.Developer)
             {
-                buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => { PromptText("Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput, onComplete: (success, error) => { if (success) NotificationManager.SendNotification($"<color=grey>[</color><color=green>Success</color><color=grey>]</color> Banned {targetName} successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=grey>[</color><color=red>Ban failed</color><color=grey>]</color>: {error}", 8000); })), () => NavigatePlayer(player), "Ban", "Cancel"); SpawnKeyboard(); },isTogglable = false, toolTip = $"Bans {targetName} from Axiom" });
+                buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => { PromptText("Enter Ban Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput, onComplete: (success, error) => { if (success) NotificationManager.SendNotification($"<color=grey>[</color><color=green>Success</color><color=grey>]</color> Banned {targetName} successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=grey>[</color><color=red>Ban failed</color><color=grey>]</color>: {error}", 8000); })), () => NavigatePlayer(player), "Ban", "Cancel"); SpawnKeyboard(); },isTogglable = false, toolTip = $"Bans {targetName} from Axiom" });
             }
 
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
