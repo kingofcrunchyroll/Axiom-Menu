@@ -47,7 +47,7 @@ namespace Axiom.Managers
             superUserTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/superuser.png", "superuser.png");
             moderatorTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/moderator.png", "moderator.png");
             blacklistTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/warning.png", "warning.png");
-            developerTexture = SafeLoadURL($"{ServerData.AssetURL}/crown.png", "crown.png");
+            developerTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/crown.png", "crown.png");
 
             // Custom properties are per-room in Photon, so re-broadcast on every join rather
             // than once at startup - same pattern FriendManager already uses for its own check.

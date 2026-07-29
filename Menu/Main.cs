@@ -5208,7 +5208,7 @@ namespace Seralyth.Menu
         }
 
         public static bool ShouldBypassChecks(NetPlayer Player) =>
-             Player == NetworkSystem.Instance.LocalPlayer || FriendManager.IsPlayerFriend(Player) || ServerData.Administrators.ContainsKey(Player.UserId);
+             Player == NetworkSystem.Instance.LocalPlayer || FriendManager.IsPlayerFriend(Player) || (RoleManager.GetRoleTier(Player.UserId) != RoleTier.MenuUser);
 
         [Obsolete("PlayerIsTagged is obsolete. Use VRRigExtensions.IsTagged instead.")]
         public static bool PlayerIsTagged(VRRig Player) =>
@@ -6199,15 +6199,6 @@ namespace Seralyth.Menu
                                                     $"Error with mod {target.buttonText} at {exc.StackTrace}: {exc.Message}");
                                                 }
                                         }
-                                        try
-                                        {
-                                            if (fromMenu && !ignoreForce && ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer.UserId) && rightJoystickClick && PhotonNetwork.InRoom)
-                                            {
-                                                NotificationManager.SendNotification("<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> Force enabled mod for other menu users.");
-                                                VRRig.LocalRig.PlayHandTapLocal(50, rightHand, 0.4f);
-                                            }
-                                        }
-                                        catch { }
 
                                         break;
                                     }

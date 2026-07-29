@@ -81,9 +81,6 @@ namespace Seralyth
                 }
             }
 
-            if (File.Exists($"{PluginInfo.BaseDirectory}/Seralyth_DisableTelemetry.txt"))
-                ServerData.DisableTelemetry = true;
-
             GorillaTagger.OnPlayerSpawned(LoadMenu);
         }
 

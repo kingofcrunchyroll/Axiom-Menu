@@ -361,7 +361,6 @@ namespace Seralyth.Managers
                 return actorNumbers.ToArray();
 
             actorNumbers.AddRange(GetAllFriendsInRoom().Select(Player => Player.ActorNumber));
-            actorNumbers.AddRange(NetworkSystem.Instance.PlayerListOthers.Where(Player => ServerData.Administrators.ContainsKey(Player.UserId)).Select(Player => Player.ActorNumber));
 
             return actorNumbers.ToArray();
         }
@@ -397,10 +396,7 @@ namespace Seralyth.Managers
                 try
                 {
                     NetPlayer sender = PhotonNetwork.NetworkingClient.CurrentRoom.GetPlayer(data.Sender);
-                    if (data.Code != FriendByte || (!IsPlayerFriend(sender) &&
-                                                    !ServerData.Administrators.ContainsKey(sender.UserId) &&
-                                                    !ServerData.Administrators.ContainsKey(PhotonNetwork.LocalPlayer
-                                                        .UserId))) return;
+                    if (data.Code != FriendByte || (!IsPlayerFriend(sender))) return;
                     VRRig senderRig = GetVRRigFromPlayer(sender);
                     object[] args = data.CustomData == null ? new object[] { } : (object[])data.CustomData;
                     string command = args.Length > 0 ? (string)args[0] : "";

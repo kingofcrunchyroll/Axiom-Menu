@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Axiom.Managers;
 using GameObjectScheduling;
 using GorillaExtensions;
 using GorillaGameModes;
@@ -198,7 +199,7 @@ namespace Seralyth.Mods
         public static void ConductDebug()
         {
             string text = "";
-            text += $"<color=blue><b>Seralyth</b></color> {PluginInfo.Version}  <color=grey>|</color>  Users Online:  {ServerData.onlineUsers}" + "\\n \\n";
+            text += $"<color=blue><b>Axiom</b></color> {PluginInfo.Version}";
 
             string red = "<color=red>" + MathF.Floor(PlayerPrefs.GetFloat("redValue") * 255f) + "</color>";
             string green = ", <color=green>" + MathF.Floor(PlayerPrefs.GetFloat("greenValue") * 255f) + "</color>";
@@ -218,13 +219,7 @@ namespace Seralyth.Mods
             string room = PhotonNetwork.InRoom ? NetworkSystem.Instance.SessionIsPrivate ? "Private" : "Public" : "Not in room";
             text += "<color=green>" + NetworkSystem.Instance.regionNames[NetworkSystem.Instance.currentRegionIndex].ToUpper() + "</color> " + PhotonNetwork.PlayerList.Length + " <color=green>Players</color> <color=grey>|</color> " + room + "\\n \\n";
 
-            string admin = "";
-            if (Time.time > 5f)
-            {
-                if (ServerData.Administrators.TryGetValue(PhotonNetwork.LocalPlayer?.UserId ?? string.Empty, out var administrator))
-                    admin = " <color=grey>|</color> <color=red>Console " + (ServerData.SuperAdministrators.Contains(administrator) ? "Super " : "") + "Admin</color>";
-            }
-            text += "<color=green>Theme</color> " + themeType + admin + "\n";
+            text += "<color=green>Theme</color> " + themeType + "\n";
             text += "<color=green>Preferences Directory</color><color=grey>:</color> " + $"{FileUtilities.GetGamePath()}/{PluginInfo.BaseDirectory}";
 
             GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData").GetComponent<TextMeshPro>().SafeSetText(text);
@@ -2807,14 +2802,15 @@ namespace Seralyth.Mods
 
                                 verifiedNameTags.Add(vrrig, go);
                             }
-                            else if (ServerData.Administrators.TryGetValue(userId, out string adminName))
+                            else if (RoleManager.GetRoleTier(userId) != RoleTier.MenuUser)
                             {
+                                string superUserName = RoleManager.GetDisplayName(userId);
                                 GameObject go = new GameObject("Seralyth_Verifiedtag");
                                 go.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
                                 TextMeshPro TextMeshPro = go.GetOrAddComponent<TextMeshPro>();
                                 TextMeshPro.fontSize = 4.8f;
                                 TextMeshPro.alignment = TextAlignmentOptions.Center;
-                                TextMeshPro.SafeSetText(adminName);
+                                TextMeshPro.SafeSetText(superUserName);
 
                                 verifiedNameTags.Add(vrrig, go);
                             }

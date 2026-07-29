@@ -71,7 +71,7 @@ namespace Seralyth.Managers
 
         Always assist to the best of your ability.";
 
-        private const string ApiUrl = "https://api.llm7.io/v1/chat/completions";
+        private const string ApiUrl = "https://api.llm7.io/v1/chat/completions"; // swapped API due to payment issues
 
         private const string ApiKey = "unused";
 

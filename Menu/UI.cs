@@ -495,29 +495,10 @@ namespace Seralyth.Menu
                         DebugPrint(args.Skip(1).Join(" "));
                         break;
                     }
-                case "admin":
-                    {
-                        string id = args.Length > 1 ? args[1] : PhotonNetwork.LocalPlayer?.UserId;
-                        string name = args.Length > 2 ? args[2] : PhotonNetwork.LocalPlayer?.NickName;
-
-                        if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(name))
-                        {
-                            ServerData.LocalAdmins.Add(id, name);
-                            DebugPrint($"Added ({id}, {name}) to local administrators");
-                        }
-
-                        break;
-                    }
                 case "beta":
                     {
                         PluginInfo.BetaBuild = args.Length > 1 && args[1].ToLower() == "true";
                         DebugPrint($"PluginInfo.BetaBuild is now {PluginInfo.BetaBuild}");
-                        break;
-                    }
-                case "telemetry":
-                    {
-                        ServerData.DisableTelemetry = args.Length < 2 || args[1] == "false";
-                        DebugPrint($"Telemetry is now {(ServerData.DisableTelemetry ? "disabled" : "enabled")}");
                         break;
                     }
                 case "prompt":
