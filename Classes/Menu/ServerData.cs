@@ -248,30 +248,6 @@ namespace Seralyth.Classes.Menu
                         //Console.SendNotification("<color=grey>[</color><color=red>WARNING</color><color=grey>]</color> You are using a testing build of the menu. Be warned that there may be bugs and issues that could cause crashes, data loss, or other unexpected behavior.", 10000);
                     }
                 }
-                else if (VersionToNumber(PluginInfo.Version) < VersionToNumber(minimumVersion))
-                {
-                    if (!OutdatedVersion)
-                    {
-                        OutdatedVersion = true;
-                        Debug.Log("Version is severely outdated");
-                        GorillaComputer.instance.GeneralFailureMessage("Please update your menu. For safety purposes, you have been blocked from joining rooms.");
-                        if (NetworkSystem.Instance.InRoom)
-                            NetworkSystem.Instance.ReturnToSinglePlayer();
-                        //Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using a severely outdated version of the menu. Please update your menu if available. For safety purposes, you have been blocked from joining rooms.", 10000);
-                        Main.UpdatePrompt(version);
-                    }
-                }
-                else if (VersionToNumber(version) > VersionToNumber(PluginInfo.Version))
-                {
-                    if (!OutdatedVersion)
-                    {
-                        OutdatedVersion = true;
-                        Debug.Log("Version is outdated");
-                        //Console.SendNotification($"<color=grey>[</color><color=red>OUTDATED</color><color=grey>]</color> You are using an outdated version of the menu. Please update to version {version}.", 10000);
-                        Main.UpdatePrompt(version);
-                        shownPrompt = true;
-                    }
-                }
 
                 // Patreon members
                 if (PatreonManager.instance != null)

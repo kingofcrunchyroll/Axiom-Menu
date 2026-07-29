@@ -2219,54 +2219,6 @@ namespace Seralyth.Menu
             FollowMenuSettings(donateImage);
         }
 
-        private static void AddUpdateButton()
-        {
-            GameObject buttonObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            if (!UnityInput.GetKey(Key.Q) && !isKeyboardPc)
-                buttonObject.layer = 2;
-
-            buttonObject.GetComponent<BoxCollider>().isTrigger = true;
-            buttonObject.transform.parent = menu.transform;
-            buttonObject.transform.rotation = Quaternion.identity;
-
-            buttonObject.transform.localScale = new Vector3(0.09f, 0.102f, 0.08f);
-            buttonObject.transform.localPosition = thinMenu ? new Vector3(0.56f, 0.450f, -0.58f) : new Vector3(0.56f, 0.7f, -0.58f);
-
-            buttonObject.AddComponent<ButtonCollider>().relatedText = "Update Button";
-
-            ColorChanger colorChanger = buttonObject.AddComponent<ColorChanger>();
-            colorChanger.colors = buttonColors[swapButtonColors ? 1 : 0];
-
-            FollowMenuSettings(buttonObject, !swapButtonColors);
-
-            Image updateImage = new GameObject
-            {
-                transform =
-                {
-                    parent = canvasObj.transform
-                }
-            }.AddComponent<Image>();
-            if (updateIcon == null)
-                updateIcon = LoadTextureFromResource($"{PluginInfo.ClientResourcePath}.update.png");
-
-            if (updateMat == null)
-                updateMat = new Material(updateImage.material);
-
-            updateImage.material = updateMat;
-            updateImage.material.SetTexture("_MainTex", updateIcon);
-            updateImage.AddComponent<UIColorChanger>().colors = textColors[1];
-
-            RectTransform imageTransform = updateImage.GetComponent<RectTransform>();
-            imageTransform.localPosition = Vector3.zero;
-            imageTransform.sizeDelta = new Vector2(.03f, .03f);
-
-            imageTransform.localPosition = thinMenu ? new Vector3(.064f, 0.35f / 2.6f, -0.58f / 2.6f) : new Vector3(.064f, 0.54444444444f / 2.6f, -0.58f / 2.6f);
-
-            imageTransform.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
-
-            FollowMenuSettings(updateImage);
-        }
-
         private static void AddReturnButton(bool offcenteredPosition)
         {
             GameObject buttonObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -2862,11 +2814,6 @@ namespace Seralyth.Menu
 
             if (enableDebugButton)
                 AddDebugButton();
-            else
-            {
-                if (ServerData.OutdatedVersion)
-                    AddUpdateButton();
-            }
 
             if (!disablePageButtons && CurrentPrompt == null && !pageScrolling)
                 AddPageButtons();
@@ -4260,15 +4207,6 @@ namespace Seralyth.Menu
 
             if (menu != null && prompts.Count <= 1)
                 ReloadMenu();
-        }
-
-        private static string versionArchive;
-        public static void UpdatePrompt(string newVersion = null)
-        {
-            LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Menu/Notifications/win7-exc.ogg", "Audio/Menu/Notifications/win7-exc.ogg", clip => Play2DAudio(clip, buttonClickVolume / 10f));
-
-            versionArchive ??= newVersion;
-            Prompt($"A new version is available ({versionArchive}). Would you like to update?", Settings.UpdateMenu);
         }
 
         public static void BannedPrompt(string issuer, string reason, bool test = false)

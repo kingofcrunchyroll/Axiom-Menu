@@ -9,6 +9,7 @@ using Seralyth.Classes.Menu;
 using Seralyth.Managers;
 using Seralyth.Mods;
 using System;
+using System.Reflection.Emit;
 
 namespace Axiom.SuperUsers
 {
@@ -78,14 +79,22 @@ namespace Axiom.SuperUsers
                         new ButtonInfo { buttonText = "Set Name To FluxedGaming", method = () => Main.ChangeName("FluxedGaming"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>FluxedGaming</color>."},
                         new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
 
-                        new ButtonInfo { buttonText = "================", label = true },
+                        new ButtonInfo { buttonText = "==== Icon Buttons ====", label = true },
                         new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
+
+                        new ButtonInfo { buttonText = "===== idk =====", label = true},
+                        new ButtonInfo { buttonText = "Break Mod Checkers", enableMethod = Fun.BreakModCheckers, disableMethod = Safety.BypassModCheckers, toolTip = "Tells players using mod checkers that you have every mod possible."},
+                        new ButtonInfo { buttonText = "Custom Mod Spoofer", method = Fun.CustomModSpoofer, isTogglable = false, toolTip = "Make mod checkers see only what you allow."},
                         new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+
+                        new ButtonInfo { buttonText = "=== Moderation Stuff ===", label = true},
+                        new ButtonInfo { buttonText = "Report Gun", method = Fun.ReportGun, toolTip = "Reports whoever your hand desires for cheating."},
 
                         new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
                         new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
-                        new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false }
+                        new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false },
+                        new ButtonInfo { buttonText = "Enable Debug Button", enableMethod = () => Main.enableDebugButton = true, disableMethod = () => Main.enableDebugButton = false, toolTip = "Enables the Debug Button"}
                     };
                         Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
                         break;
@@ -96,7 +105,7 @@ namespace Axiom.SuperUsers
                     {
                         new ButtonInfo { buttonText = "Hide Moderator Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
-                        new ButtonInfo{ buttonText = "Not sure what else to put in here yet :/", label = true}
+                        new ButtonInfo { buttonText = "Not sure what else to put in here yet :/", label = true}
                     };
                         Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
                         break;

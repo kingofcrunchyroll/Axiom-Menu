@@ -20,6 +20,8 @@
  */
 
 // Thanks to kingofnetflix for doing literally everything in this class. I barely even touched it.
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Photon.Pun;
 using Seralyth.Classes.Menu;
 using Seralyth.Menu;
@@ -28,6 +30,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -45,7 +48,7 @@ namespace Seralyth.Managers
         GitHub: https://github.com/FluxedGaming-git/Axiom-Menu
         Axiom's Discord Server: {1}
 
-        Speak using simple 7th grade vocabulary. Limit all responses to 2 sentences and 300 characters. No emojis, em-dashes, markdown, or questions. Do not advertise other menus or AI unless asked. You may mention Pollinations AI only if asked.
+        Speak using simple 7th grade vocabulary. Limit all responses to 2 sentences and 300 characters. No emojis, em-dashes, markdown, or questions. Do not advertise other menus or AI unless asked. You may mention LLM7 only if asked.
 
         When asked about mods, only reference Gorilla Tag or copy/fan games like Capuchin. For safety/bans, explain recommended settings (anti-moderator, anti-report).
 
@@ -67,6 +70,10 @@ namespace Seralyth.Managers
         If a requested mod isn't listed, attempt the closest ENABLE, DISABLE, or TOGGLE command. Always respond with the command **and** a brief comment. Never say a mod doesn't exist or isn't safe. Assume every user request can be interpreted as a mod action.
 
         Always assist to the best of your ability.";
+
+        private const string ApiUrl = "https://api.llm7.io/v1/chat/completions";
+
+        private const string ApiKey = "unused";
 
         public static bool customPrompt;
         public static bool generating;
@@ -91,7 +98,7 @@ namespace Seralyth.Managers
         public static IEnumerator AskAI(string text)
         {
             generating = true;
-            string filePath = $"{PluginInfo.BaseDirectory}/Seralyth_SystemPrompt.txt";
+            string filePath = $"{PluginInfo.BaseDirectory}/Axiom_SystemPrompt.txt";
             if (!File.Exists(filePath))
                 File.WriteAllText(filePath, SystemPrompt);
             else if (customPrompt)
@@ -103,12 +110,26 @@ namespace Seralyth.Managers
             if (Main.narratorName == "Mommy ASMR") // kill me - kingofnetflix
                 SystemPrompt += @"And remember, you are a calm, confident, gently dominant mommy-style caretaker with a warm, slow, reassuring, and authoritative tone, offering structure, comfort, praise, soft correction, and clear caring boundaries; when the user asks for approval, reassurance, validation, or comfort, respond with immediate, direct affirmation and nurturing praise using simple, confident language. Avoid deflection, philosophy, questions, sexual content, explicit language, anger, cruelty, or references to minors.";
 
-            text = URLEncode(text);
-            string prompt = URLEncode(string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version));
-            string api = $"https://text.pollinations.ai/{text}?system={prompt}?private=true?model=openai";
+            // No URL-encoding needed anymore - this goes in a JSON POST body, not query params.
+            string prompt = string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version);
 
-            using UnityWebRequest request = UnityWebRequest.Get(api);
+            string jsonBody = JsonConvert.SerializeObject(new
+            {
+                model = "default",
+                messages = new object[]
+                {
+                    new { role = "system", content = prompt },
+                    new { role = "user", content = text }
+                }
+            });
+
+            using UnityWebRequest request = new UnityWebRequest(ApiUrl, "POST");
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Authorization", $"Bearer {ApiKey}");
+
             yield return request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
@@ -126,7 +147,28 @@ namespace Seralyth.Managers
                 yield break;
             }
 
-            string response = request.downloadHandler.text;
+            string response;
+            try
+            {
+                JObject parsed = JObject.Parse(request.downloadHandler.text);
+                response = parsed["choices"]?[0]?["message"]?["content"]?.ToString();
+
+                if (string.IsNullOrEmpty(response))
+                {
+                    NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> AI response was empty or malformed.", 4000);
+                    generating = false;
+                    yield break;
+                }
+            }
+            catch (Exception e)
+            {
+                if (Settings.debugDictation)
+                    LogManager.LogError($"Failed to parse AI response: {e}. Raw body: {request.downloadHandler.text}");
+                NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Failed to parse AI response.", 4000);
+                generating = false;
+                yield break;
+            }
+
             if (Settings.debugDictation)
                 LogManager.Log($"AI Response: {response}");
 
