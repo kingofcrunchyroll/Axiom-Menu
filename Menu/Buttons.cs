@@ -1355,7 +1355,6 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Auto Purchase Current Cosmetics", method = Fun.AutoPurchasePaidCosmetics, toolTip = "Automatically purchases all cosmetics on your outfit until you own everything. This does use shiny rocks." },
                 new ButtonInfo { buttonText = "Disable Cosmetics on Tag", method = Fun.DisableCosmeticsOnTag, toolTip = "Disables your cosmetics when you get tagged, good for ambush." },
 
-                new ButtonInfo { buttonText = "Unlock Fan Club Subscription", aliases = new[] { "Unlock VIM", "Unlock Very Cool Monke" }, enableMethod =() => SubscriptionPatches.enabled = true, disableMethod =() => SubscriptionPatches.enabled = false, toolTip = "Unlocks the Gorilla Tag fan club subscription. This mod is client-sided." },
                 new ButtonInfo { buttonText = "Unlock All Cosmetics", method = Fun.UnlockAllCosmetics, toolTip = "Unlocks every cosmetic in the game. This mod is client-sided." },
 
                 new ButtonInfo { buttonText = "Sticky Holdables", method = Fun.StickyHoldables, toolTip = "Makes your holdables sticky.", legal = true},
@@ -1600,15 +1599,9 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Round End Sound Spam <color=grey>[</color><color=green>G</color><color=grey>]</color>", method =() => Sound.BetaSoundSpam(2), toolTip = "Plays the round end sound when holding <color=green>grip</color>." },
 
                 new ButtonInfo { buttonText = "Slow Self", method = Overpowered.SlowSelf, isTogglable = false, toolTip = "Forces tag freeze on yourself." },
-                new ButtonInfo { buttonText = "Slow Gun", method = Overpowered.SlowGun, toolTip = "Forces tag freeze on whoever your hand desires." },
-                new ButtonInfo { buttonText = "Slow Aura", method = Overpowered.SlowAura, toolTip = "Forces tag freeze on players nearby you."},
-                new ButtonInfo { buttonText = "Slow On Touch", method = Overpowered.SlowOnTouch, toolTip = "Forces tag freeze on whoever you touch."},
 
                 new ButtonInfo { buttonText = "Vibrate Self", method = Overpowered.VibrateSelf, isTogglable = false, toolTip = "Makes your controllers vibrate." },
-                new ButtonInfo { buttonText = "Vibrate Gun", method = Overpowered.VibrateGun, toolTip = "Makes whoever your hand desires' controllers vibrate." },
-                new ButtonInfo { buttonText = "Vibrate All", method = Overpowered.VibrateAll, toolTip = "Makes everyone in the the room's controllers vibrate." },
-                new ButtonInfo { buttonText = "Vibrate Aura", method = Overpowered.VibrateAura, toolTip = "Makes players nearby you controllers vibrate."},
-                new ButtonInfo { buttonText = "Vibrate On Touch", method = Overpowered.VibrateOnTouch, toolTip = "Makes whoever you touch controllers vibrate."},
+                
             },
 
             new[] { // Soundboard [18]

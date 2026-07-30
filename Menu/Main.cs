@@ -4212,7 +4212,7 @@ namespace Seralyth.Menu
         public static void BannedPrompt(string issuer, string reason, bool test = false)
         {
             NotificationManager.SendNotification($"<color=grey[</color><color=red>BANNED</color><color=grey]</color> You have been <color=red>Banned</color> from using Axiom for {reason}. You have been banned by an Axiom {issuer}.", 10000);
-            PromptSingle($"You have been Banned from using Axiom.\n\nBan Reason: {reason}\nIssuer: {issuer}\n\n(You can try to make an appeal in the Discord.)", () => { if (test) Buttons.CurrentCategoryName = "SuperUser Tools"; else Lockdown = true; });
+            PromptSingle($"You have been Banned from using Axiom.\n\nBan Reason: {reason}\nIssuer: {issuer}\n\n(You can try to make an appeal in the Discord.)", () => { if (test) Buttons.CurrentCategoryName = "SuperUser Tools"; else UnloadMenu(); });
         }
 
         public static readonly Dictionary<(Color, Color), Texture2D> cacheGradients = new Dictionary<(Color, Color), Texture2D>();
@@ -7048,7 +7048,7 @@ jgs \_   _/ |Oo\
         public static readonly List<string> skipButtons = new List<string> { };
         public static bool translate;
 
-        public static string serverLink = "https://discord.gg/gNqNT7upCh";
+        public static string serverLink = "https://discord.gg/XCWc2ezstp";
 
         public static int arrowType;
         public static readonly string[][] arrowTypes = {

@@ -12,6 +12,7 @@ using Seralyth.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Claims;
 using UnityEngine;
 using UnityEngine.Rendering;
 using static Seralyth.Utilities.AssetUtilities;
@@ -40,6 +41,8 @@ namespace Axiom.Managers
         public Texture2D moderatorTexture;
         public Texture2D blacklistTexture;
         public Texture2D developerTexture;
+        public Texture2D eaTexture;
+        public Texture2D testerTexture;
 
         public void Awake()
         {
@@ -48,6 +51,8 @@ namespace Axiom.Managers
             moderatorTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/moderator.png", "moderator.png");
             blacklistTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/warning.png", "warning.png");
             developerTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/crown.png", "crown.png");
+            eaTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/earlyaccess.png", "earlyaccess.png");
+            testerTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/tester.png", "tester.png");
 
             // Custom properties are per-room in Photon, so re-broadcast on every join rather
             // than once at startup - same pattern FriendManager already uses for its own check.
@@ -195,6 +200,12 @@ namespace Axiom.Managers
                     return superUserMaterial;
                 case RoleTier.SuperUser:
                     EnsureMaterial(ref superUserMaterial, superUserTexture);
+                    return superUserMaterial;
+                case RoleTier.Tester:
+                    EnsureMaterial(ref superUserMaterial, testerTexture);
+                    return superUserMaterial;
+                case RoleTier.EarlyAccess:
+                    EnsureMaterial(ref superUserMaterial, eaTexture);
                     return superUserMaterial;
                 case RoleTier.MenuUser:
                     EnsureMaterial(ref menuUserMaterial, menuUserTexture);

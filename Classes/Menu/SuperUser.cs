@@ -10,6 +10,8 @@ using Seralyth.Managers;
 using Seralyth.Mods;
 using System;
 using System.Reflection.Emit;
+using GorillaNetworking;
+using Seralyth.Patches.Menu;
 
 namespace Axiom.SuperUsers
 {
@@ -26,6 +28,27 @@ namespace Axiom.SuperUsers
         }
 
         public static string specialColor = "#FF5AA1";
+
+        private static void Cosmetic(string argument)
+        {
+            var item = CosmeticsController.instance.GetItemFromDict(CosmeticsController.instance.GetItemNameFromDisplayName(argument.ToUpper()));
+            try
+            {
+                CosmeticsController.instance.ApplyCosmeticItemToSet(
+                    CosmeticsController.instance.currentWornSet,
+                    item,
+                    false, // isLeftHand - only relevant for hand-specific items
+                    true   // applyToPlayerPrefs
+                );
+                CosmeticsController.instance.UpdateWornCosmetics(true, false); // sync, playfx
+                CosmeticsController.instance.UpdateWardrobeModelsAndButtons();
+                CosmeticsController.instance.OnCosmeticsUpdated?.Invoke();
+                string s = item.displayName.ToString();
+                NotificationManager.SendNotification($"enabled {s}");
+            }
+            catch (Exception ex)
+            { NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Failed to get Cosmetic: {ex}"); }
+        }
 
         private static IEnumerator GetSuperToolsRoutine()
         {
@@ -83,18 +106,26 @@ namespace Axiom.SuperUsers
                         new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
 
-                        new ButtonInfo { buttonText = "===== idk =====", label = true},
-                        new ButtonInfo { buttonText = "Break Mod Checkers", enableMethod = Fun.BreakModCheckers, disableMethod = Safety.BypassModCheckers, toolTip = "Tells players using mod checkers that you have every mod possible."},
-                        new ButtonInfo { buttonText = "Custom Mod Spoofer", method = Fun.CustomModSpoofer, isTogglable = false, toolTip = "Make mod checkers see only what you allow."},
-                        new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
-
-                        new ButtonInfo { buttonText = "=== Moderation Stuff ===", label = true},
-                        new ButtonInfo { buttonText = "Report Gun", method = Fun.ReportGun, toolTip = "Reports whoever your hand desires for cheating."},
-
                         new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
                         new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
                         new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false },
-                        new ButtonInfo { buttonText = "Enable Debug Button", enableMethod = () => Main.enableDebugButton = true, disableMethod = () => Main.enableDebugButton = false, toolTip = "Enables the Debug Button"}
+
+                        new ButtonInfo { buttonText = "===== idk =====", label = true},
+                        new ButtonInfo { buttonText = "Stump Kick Gun", method = Overpowered.StumpKickGun, toolTip = "Kicks whoever your hand desires if they are in stump." },
+                        new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+                        new ButtonInfo { buttonText = "Break Mod Checkers", enableMethod = Fun.BreakModCheckers, disableMethod = Safety.BypassModCheckers, toolTip = "Tells players using mod checkers that you have every mod possible."},
+                        new ButtonInfo { buttonText = "Custom Mod Spoofer", method = Fun.CustomModSpoofer, isTogglable = false, toolTip = "Make mod checkers see only what you allow."},
+                        new ButtonInfo { buttonText = "Vibrate Gun", method = Overpowered.VibrateGun, toolTip = "Makes whoever your hand desires' controllers vibrate." },
+                        new ButtonInfo { buttonText = "Vibrate All", method = Overpowered.VibrateAll, toolTip = "Makes everyone in the the room's controllers vibrate." },
+                        new ButtonInfo { buttonText = "Vibrate Aura", method = Overpowered.VibrateAura, toolTip = "Makes players nearby you controllers vibrate."},
+                        new ButtonInfo { buttonText = "Vibrate On Touch", method = Overpowered.VibrateOnTouch, toolTip = "Makes whoever you touch controllers vibrate."},
+                        new ButtonInfo { buttonText = "Slow Gun", method = Overpowered.SlowGun, toolTip = "Forces tag freeze on whoever your hand desires." },
+                        new ButtonInfo { buttonText = "Slow Aura", method = Overpowered.SlowAura, toolTip = "Forces tag freeze on players nearby you."},
+                        new ButtonInfo { buttonText = "Slow On Touch", method = Overpowered.SlowOnTouch, toolTip = "Forces tag freeze on whoever you touch."},
+                        new ButtonInfo { buttonText = "Unlock Fan Club Subscription", aliases = new[] { "Unlock VIM", "Unlock Very Cool Monke" }, enableMethod =() => SubscriptionPatches.enabled = true, disableMethod =() => SubscriptionPatches.enabled = false, toolTip = "Unlocks the Gorilla Tag fan club subscription. This mod is client-sided." },
+
+                        new ButtonInfo { buttonText = "=== Moderation Stuff ===", label = true},
+                        new ButtonInfo { buttonText = "Report Gun", method = Fun.ReportGun, toolTip = "Reports whoever your hand desires for cheating."},
                     };
                         Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
                         break;
@@ -105,7 +136,23 @@ namespace Axiom.SuperUsers
                     {
                         new ButtonInfo { buttonText = "Hide Moderator Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
-                        new ButtonInfo { buttonText = "Not sure what else to put in here yet :/", label = true}
+                        
+                        new ButtonInfo { buttonText = "=== Moderation Stuff ===", label = true},
+                        new ButtonInfo { buttonText = "Report Gun", method = Fun.ReportGun, toolTip = "Reports whoever your hand desires for cheating."},
+
+                        new ButtonInfo { buttonText = "===== idk =====", label = true},
+                        new ButtonInfo { buttonText = "Stump Kick Gun", method = Overpowered.StumpKickGun, toolTip = "Kicks whoever your hand desires if they are in stump." },
+                        new ButtonInfo { buttonText = "Virtual Stump Kick Gun", method = Overpowered.VirtualStumpKickGun, toolTip = "Kicks whoever your hand desires in the virtual stump."},
+                        new ButtonInfo { buttonText = "Break Mod Checkers", enableMethod = Fun.BreakModCheckers, disableMethod = Safety.BypassModCheckers, toolTip = "Tells players using mod checkers that you have every mod possible."},
+                        new ButtonInfo { buttonText = "Custom Mod Spoofer", method = Fun.CustomModSpoofer, isTogglable = false, toolTip = "Make mod checkers see only what you allow."},
+                        new ButtonInfo { buttonText = "Vibrate Gun", method = Overpowered.VibrateGun, toolTip = "Makes whoever your hand desires' controllers vibrate." },
+                        new ButtonInfo { buttonText = "Vibrate All", method = Overpowered.VibrateAll, toolTip = "Makes everyone in the the room's controllers vibrate." },
+                        new ButtonInfo { buttonText = "Vibrate Aura", method = Overpowered.VibrateAura, toolTip = "Makes players nearby you controllers vibrate."},
+                        new ButtonInfo { buttonText = "Vibrate On Touch", method = Overpowered.VibrateOnTouch, toolTip = "Makes whoever you touch controllers vibrate."},
+                        new ButtonInfo { buttonText = "Slow Gun", method = Overpowered.SlowGun, toolTip = "Forces tag freeze on whoever your hand desires." },
+                        new ButtonInfo { buttonText = "Slow Aura", method = Overpowered.SlowAura, toolTip = "Forces tag freeze on players nearby you."},
+                        new ButtonInfo { buttonText = "Slow On Touch", method = Overpowered.SlowOnTouch, toolTip = "Forces tag freeze on whoever you touch."},
+                        new ButtonInfo { buttonText = "Unlock Fan Club Subscription", aliases = new[] { "Unlock VIM", "Unlock Very Cool Monke" }, enableMethod =() => SubscriptionPatches.enabled = true, disableMethod =() => SubscriptionPatches.enabled = false, toolTip = "Unlocks the Gorilla Tag fan club subscription. This mod is client-sided." },
                     };
                         Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
                         break;

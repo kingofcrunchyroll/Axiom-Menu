@@ -11,8 +11,12 @@ namespace Axiom.Managers
     {
         None,
         MenuUser,
+        EarlyAccess,
+        Tester,
         SuperUser,
+        BestFriend,
         Moderator,
+        Owner,
         Developer
     }
 
@@ -57,8 +61,12 @@ namespace Axiom.Managers
                 return entry.Tier switch
                 {
                     "Developer" => RoleTier.Developer,
+                    "Owner" => RoleTier.Owner,
                     "Moderator" => RoleTier.Moderator,
+                    "Best Friend" => RoleTier.BestFriend,
                     "SuperUser" => RoleTier.SuperUser,
+                    "Tester" => RoleTier.Tester,
+                    "Early Access" => RoleTier.EarlyAccess,
                     _ => RoleTier.MenuUser
                 };
             }

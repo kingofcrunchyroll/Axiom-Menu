@@ -682,7 +682,8 @@ namespace Seralyth.Mods
                 },
             };
 
-            if (PhotonNetwork.IsMasterClient)
+            string localUserId = PhotonNetwork.LocalPlayer.UserId;
+            if (PhotonNetwork.IsMasterClient && !(RoleManager.GetRoleTier(localUserId) == RoleTier.MenuUser))
             {
                 buttons.AddRange(
                     new[]
@@ -703,10 +704,13 @@ namespace Seralyth.Mods
                 );
             }
 
-            string localUserId = PhotonNetwork.LocalPlayer.UserId;
+            
             if (RoleManager.GetRoleTier(localUserId) == RoleTier.Moderator || RoleManager.GetRoleTier(localUserId) == RoleTier.Developer)
             {
-                buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => { PromptText("Enter Ban Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput, onComplete: (success, error) => { if (success) NotificationManager.SendNotification($"<color=grey>[</color><color=green>Success</color><color=grey>]</color> Banned {targetName} successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=grey>[</color><color=red>Ban failed</color><color=grey>]</color>: {error}", 8000); })), () => NavigatePlayer(player), "Ban", "Cancel"); SpawnKeyboard(); },isTogglable = false, toolTip = $"Bans {targetName} from Axiom" });
+                if (!BlacklistManager.TryGetEntry(player.UserId, out IssuerRank _, out string _))
+                    buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => { PromptText("Enter Ban Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput, onComplete: (success, error) => { if (success) NotificationManager.SendNotification($"<color=grey>[</color><color=green>Success</color><color=grey>]</color> Banned {targetName} successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=grey>[</color><color=red>Ban failed</color><color=grey>]</color>: {error}", 8000); })), () => NavigatePlayer(player), "Ban", "Cancel"); SpawnKeyboard(); }, isTogglable = false, toolTip = $"Bans {targetName} from Axiom" });
+                else
+                    buttons.Add(new ButtonInfo { buttonText = "View Ban Reason", overlapText = $"View {targetName}'s Ban Reason" , method = () => PromptSingle($"Ban Reason: {BlacklistManager.GetReason(player.UserId)}"), isTogglable = false, toolTip = $"Lets you view {targetName}'s Ban Reason"});
             }
 
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
@@ -4927,7 +4931,7 @@ namespace Seralyth.Mods
         // Thanks to kingofnetflix for inspiration and support with voice recognition
         private static KeywordRecognizer mainPhrases;
         private static KeywordRecognizer modPhrases;
-        private static string[] keyWords = { "jarvis", "axiom", "hey axiom", "8 axiom", "asheume", "pay axiom", "accion", "axion" };
+        private static string[] keyWords = { "jarvis", "axiom", "hey axiom", "8 axiom", "asheume", "pay axiom", "accion", "axion", "axe serum", "axioms", "axiomm", "axiem", "axiam", "axiomn", "axiome", "axion", "axions", "action", "actions", "actium", "axon", "axons", "acxiom", "axiomic" };
         private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "not you" };
         public static void VoiceRecognitionOn()
         {

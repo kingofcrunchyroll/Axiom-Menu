@@ -20,6 +20,7 @@
  */
 
 // Thanks to kingofnetflix for doing literally everything in this class. I barely even touched it.
+using GorillaNetworking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Photon.Pun;
@@ -61,13 +62,16 @@ namespace Seralyth.Managers
         <ENABLEMOD_""ModName""> - Enables the mod.
         <DISABLEMOD_""ModName""> - Disables the mod.
         <TOGGLEMOD_""ModName""> - Toggles the mod.
-        <SETNAME_""Name""> - Change user's name.
+        <SETNAME_""Name""> - Change user's name. (**ONLY** use when specified to change the user's name)
         <SETCOLOR""Hex""> - Change color (hex code only).
         <JOINROOM_""RoomCode""> - Join a room. Use ""RANDOM"" for random rooms or when asked to server hop.
         <QUITGAME> - Quit the game.
         <DISCONNECT> - Leave the current lobby.
+        <OUTFIT_Int> - Switches Outfits | Range (1-10). | (Only use when the user includes the word ""Outfit"" or similar words) | Aliases: [ ""free"": 3 ]
+        <WEAR_""CosmeticName""> - Put on the chosen cosmetic. (When asked to ""Put On"" or ""Wear"" something, use this command. For Example when asked to ""Put on Outlaw Hat"" use the command as shown: <WEAR_Outlaw Hat>)
+        <REMOVE_""CosmeticName""> - Take's off the chosen cosmetic. (Similar usage to <WEAR>)
 
-        If a requested mod isn't listed, attempt the closest ENABLE, DISABLE, or TOGGLE command. Always respond with the command **and** a brief comment. Never say a mod doesn't exist or isn't safe. Assume every user request can be interpreted as a mod action.
+        If a requested mod isn't listed, attempt the closest ENABLE, DISABLE, or TOGGLE command. Always output the command tag exactly as specified above without the dash at the end, followed by a brief comment. Never say a mod doesn't exist or isn't safe. Assume every user request can be interpreted as a mod action.
 
         Always assist to the best of your ability.";
 
@@ -288,6 +292,52 @@ namespace Seralyth.Managers
                             NetworkSystem.Instance.ReturnToSinglePlayer();
                             break;
                         }
+                    case "OUTFIT":
+                        {
+                            int fit = int.Parse(argument);
+                            CosmeticsController.instance.LoadSavedOutfit(fit - 1);
+                            Pop();
+                            break;
+                        }
+                    case "WEAR":
+                        {
+                            var item = CosmeticsController.instance.GetItemFromDict(CosmeticsController.instance.GetItemNameFromDisplayName(argument.ToUpper()));
+                            try
+                            { 
+                                CosmeticsController.instance.ApplyCosmeticItemToSet(
+                                    CosmeticsController.instance.currentWornSet,
+                                    item,
+                                    false, // isLeftHand - only relevant for hand-specific items
+                                    true   // applyToPlayerPrefs
+                                );
+                                CosmeticsController.instance.UpdateWornCosmetics(true, false); // sync, playfx
+                                CosmeticsController.instance.UpdateWardrobeModelsAndButtons();
+                                CosmeticsController.instance.OnCosmeticsUpdated?.Invoke();
+                                Pop();
+                            }
+                            catch (Exception ex)
+                            { NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Failed to get Cosmetic: {ex}"); }
+                            break;
+                        }
+                    case "REMOVE":
+                        {
+                            var item = CosmeticsController.instance.GetItemNameFromDisplayName(argument.ToUpper());
+                            try
+                            {
+                                CosmeticsController.instance.RemoveCosmeticItemFromSet(
+                                    CosmeticsController.instance.currentWornSet,
+                                    item,
+                                    true   // applyToPlayerPrefs
+                                );
+                                CosmeticsController.instance.UpdateWornCosmetics(true, false); // sync, playfx
+                                CosmeticsController.instance.UpdateWardrobeModelsAndButtons();
+                                CosmeticsController.instance.OnCosmeticsUpdated?.Invoke();
+                                Pop();
+                            }
+                            catch (Exception ex)
+                            { NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Failed to get Cosmetic: {ex}"); }
+                            break;
+                        }
                 }
             }
 
@@ -297,6 +347,17 @@ namespace Seralyth.Managers
             generating = false;
 
             yield break;
+        }
+        
+        private static void Pop()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 84, false, 999999f);
+                Main.RPCProtection();
+            }
+            else
+                VRRig.LocalRig.PlayHandTapLocal(84, false, 999999f);
         }
     }
 }

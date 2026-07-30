@@ -22,6 +22,7 @@
 using Seralyth.Managers;
 using Seralyth.Menu;
 using UnityEngine;
+using Axiom.Managers;
 
 namespace Seralyth
 {
@@ -44,7 +45,7 @@ namespace Seralyth
 
         private sealed class Injector : MonoBehaviour
         {
-            private void Awake()
+            private async void Awake()
             {
                 LogManager.SetLogger((Level level, string msg) =>
                 {
