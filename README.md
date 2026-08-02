@@ -82,13 +82,16 @@ Currently I Added a **Mute** button and a **Report Category** to the Selected Pl
 <details>
   <summary><b>🗣️ Contact Information</b></summary>
 	
-Join our [Discord](https://discord.gg/gNqNT7upCh)!
+Join our [Discord](https://discord.gg/4j7pvPrz22)!
 
 </details>
 
+> [!IMPORTANT]
+> This Mod Menu will get falsely flagged by your Anti Virus. I am uncertain of why but I can assure you it does not contain any form of Malware. If you find anything that could be Malicious code, please do not hesitate to inform me on Discord where i will then take immediate action.
+
 > [!NOTE] 
 > This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2026 Another Axiom LLC.<br>
-> Menu sends requests to https://text.pollinations.ai for the mod **AI Assistant**. (when enabled)<br>
+> Menu sends requests to https://llm7.io for the mod **AI Assistant**. (when enabled)<br>
 > Menu sends requests to https://lazypy.ro for many TTS voices.<br>
 > Menu connects to wss://menu.seralyth.software for friend system and administrative purposes.<br>
 > The donate, search, star and speak symbols are provided from [Icons8](https://icons8.com).
