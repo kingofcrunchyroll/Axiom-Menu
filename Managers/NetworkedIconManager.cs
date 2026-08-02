@@ -7,6 +7,8 @@ using Photon.Realtime;
 using Seralyth;
 using Seralyth.Classes;
 using Seralyth.Classes.Menu;
+using Seralyth.Managers;
+using Seralyth.Menu;
 using Seralyth.Mods;
 using Seralyth.Utilities;
 using System.Collections.Generic;
@@ -104,8 +106,38 @@ namespace Axiom.Managers
             }
         }
 
+        private GameObject selfIcon;
+
         public void Update()
         {
+            if (showSelfIcon)
+            {
+                if (selfIcon == null)
+                {
+                    selfIcon = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    Destroy(selfIcon.GetComponent<Collider>());
+                }
+                Player localPlayer = PhotonNetwork.LocalPlayer;
+                if (localPlayer == null) return;
+                VRRig localRig = VRRig.LocalRig;
+                EnsureMaterial(ref menuUserMaterial, menuUserTexture);
+                Material badgeMaterial = hideSelfIcon ? menuUserMaterial : GetBadgeState(localPlayer);
+                Renderer rend = selfIcon.GetComponent<Renderer>();
+                rend.material = badgeMaterial;
+
+                selfIcon.transform.localScale = new Vector3(0.5f, 0.5f, 0.01f) * localRig.scaleFactor;
+                selfIcon.transform.position = localRig.headMesh.transform.position + localRig.headMesh.transform.up * (ConsoleStub.GetIndicatorDistance(localRig) * localRig.scaleFactor);
+                selfIcon.transform.LookAt(Main.TPC.GetComponent<Transform>().position);
+            }
+            else
+            {
+                if (selfIcon != null)
+                {
+                    Destroy(selfIcon);
+                    selfIcon = null;
+                }
+            }
+
             if (!PhotonNetwork.InRoom)
             {
                 if (iconPool.Count > 0)
@@ -127,7 +159,7 @@ namespace Axiom.Managers
                                            || !VRRigCache.ActiveRigs.Contains(rig)
                                            || player == null
                                            || GetBadgeState(player) == null
-                                           || (player.IsLocal && !showSelfIcon)
+                                           || player.IsLocal
                                         select rig).ToList();
 
                 foreach (VRRig rig in toRemove)

@@ -11,6 +11,8 @@ using Seralyth.Managers;
 using System.Linq;
 using System.Collections.Generic;
 using System.Net;
+using Seralyth.Patches.Safety;
+using static Seralyth.Utilities.RigUtilities;
 
 namespace Axiom.ARS
 {
@@ -20,9 +22,9 @@ namespace Axiom.ARS
 
         private static string[] exactCache;
         private static string[] containsCache;
-        private static bool HasSpaceOrUnderscore(this string text)
+        private static bool HasInvalidCharacters(this string text)
         {
-            return text.IndexOfAny(new[] { ' ', '_' }) >= 0;
+            return text.IndexOfAny(new[] { ' ', '_', '!', '@' }) >= 0;
         }
         private static bool ContainsBadWords(this string text)
         {
@@ -63,15 +65,21 @@ namespace Axiom.ARS
             NetworkSystem.Instance.OnJoinedRoomEvent += OnJoinRoom;
             NetworkSystem.Instance.OnPlayerJoined += OnPlayerJoin;
             NetworkSystem.Instance.OnReturnedToSinglePlayer += OnLeftRoom;
+            AntiCheatPatches.SendReportPatch.OnAntiCheatTrigger += OnAntiCheatTriggered;
+            NetworkSystem.Instance.OnPlayerLeft += OnPlayerLeave;
         }
 
         private static List<String> alreadyReported = new List<string>();
+        private static HashSet<VRRig> hookedRigs = new HashSet<VRRig>();
         public static void DisableARS()
         {
             NetworkSystem.Instance.OnJoinedRoomEvent -= OnJoinRoom;
             NetworkSystem.Instance.OnPlayerJoined -= OnPlayerJoin;
             NetworkSystem.Instance.OnReturnedToSinglePlayer -= OnLeftRoom;
+            AntiCheatPatches.SendReportPatch.OnAntiCheatTrigger -= OnAntiCheatTriggered;
+            NetworkSystem.Instance.OnPlayerLeft -= OnPlayerLeave;
             alreadyReported.Clear();
+            hookedRigs.Clear();
         }
 
         #endregion
@@ -81,62 +89,125 @@ namespace Axiom.ARS
         private static void OnJoinRoom()
         {
             CheckAllNames();
+            foreach (VRRig vrrig in VRRigCache.ActiveRigs)
+            {
+                vrrig.OnPlayerNameVisibleChanged += () => NameChange(vrrig);
+                if (!hookedRigs.Contains(vrrig))
+                hookedRigs.Add(vrrig);
+            }
         }
 
         private static void OnPlayerJoin(NetPlayer player)
         {
             CheckName(player);
+            VRRig playerRig = GetVRRigFromPlayer(player);
+            playerRig.OnPlayerNameVisibleChanged += () => NameChange(playerRig);
+            if (!hookedRigs.Contains(playerRig))
+                hookedRigs.Add(playerRig);
         }
 
         private static void OnLeftRoom()
         {
             alreadyReported.Clear();
+            foreach (VRRig vrrig in VRRigCache.ActiveRigs)
+            {
+                vrrig.OnPlayerNameVisibleChanged -= () => NameChange(vrrig);
+                hookedRigs.Clear();
+            }
         }
 
         private static void CheckAllNames()
         {
             foreach (NetPlayer player in PhotonNetwork.PlayerList)
             {
-                string suspectName = player.NickName.ToUpper();
-                string suspectID = player.UserId;
-
-                if (alreadyReported.Contains(suspectID)) continue;
-
-                if (suspectName.HasSpaceOrUnderscore())
+                CheckName(player); // Debloated to just this
+            }
+            foreach (GorillaPlayerScoreboardLine line in GorillaScoreboardTotalUpdater.allScoreboardLines)
+            {
+                if (line.playerName.text == ("BADGORILLA"))
                 {
-                    ReportUser(player, "Invalid Name");
-                    alreadyReported.Add(suspectID);
-                }
-                else if (suspectName.MatchesExact() || suspectName.ContainsBadWords())
-                {
-                    ReportUser(player, "Racist or Inappropriate Name");
-                    alreadyReported.Add(suspectID);
+                    if (line.linePlayer.NickName != "BADGORILLA")
+                        ReportUser(line.linePlayer, "Triggering Name Sanitization");
                 }
             }
         }
 
         private static void CheckName(NetPlayer player)
         {
-            string suspectName = player.NickName.ToUpper();
+            string suspectName = player.NickName.ToUpperInvariant();
             string suspectID = player.UserId;
 
             if (alreadyReported.Contains(suspectID)) return;
 
-            if (suspectName.HasSpaceOrUnderscore())
+            if (suspectName.HasInvalidCharacters())
             {
-                ReportUser(player, "Invalid Name");
-                alreadyReported.Add(suspectID);
+                ReportUser(player, "having an Invalid Name");
             }
             else if (suspectName.MatchesExact() || suspectName.ContainsBadWords())
             {
-                ReportUser(player, "Racist or Inappropriate Name");
-                alreadyReported.Add(suspectID);
+                ReportUser(player, "having a Racist or Inappropriate Name");
             }
         }
 
-        private static void ReportUser(NetPlayer player, string reason)
+        private static void OnAntiCheatTriggered(string suspectID, string suspectName, string reason)
         {
-            ReportPlayerFor(player, 2);
+            if (alreadyReported.Contains(suspectID)) return;
+
+            NetPlayer suspect = GetPlayerFromID(suspectID);
+            if (suspect != null)
+            {
+                ReportUser(suspect, reason);
+            }
+        }
+
+        /// <summary>
+        ///  Detects if the player has changed their name, if so check it.
+        /// </summary>
+        /// <param name="rig"></param>
+        private static void NameChange(VRRig rig)
+        {
+            NetPlayer suspect = GetPlayerFromVRRig(rig);
+            if (suspect != null)
+            {
+                CheckName(suspect);
+            }
+        }
+
+        private static void OnPlayerLeave(NetPlayer player)
+        {
+            VRRig playerRig = GetVRRigFromPlayer(player);
+            playerRig.OnPlayerNameVisibleChanged -= () => NameChange(playerRig);
+            if (hookedRigs.Contains(playerRig))
+                hookedRigs.Remove(playerRig);
+        }
+
+        /* TODO:
+        private static IEnumerator DetectSpamReport()
+        {
+            while (true)
+            {
+                yield return null;
+
+                foreach (GorillaPlayerScoreboardLine line in GorillaScoreboardTotalUpdater.allScoreboardLines)
+                {
+                    foreach (var vrrig in from vrrig in VRRigCache.ActiveRigs where !vrrig.isLocal where Safety.OverlappingButton(vrrig, report.position))
+                    {
+
+                    }
+                }
+            }
+        }
+        */
+        ///<summary>
+        /// Buttons:
+        /// HateSpeech = 0
+        /// Toxicity   = 1
+        /// Cheating   = 2
+        ///</summary>
+        private static void ReportUser(NetPlayer player, string reason, int button = 2)
+        {
+            ReportPlayerFor(player, button, true);
+            alreadyReported.Add(player.UserId);
             NotificationManager.SendNotification($"<color=grey>[</color><color=orange>ARS</color><color=grey>]</color> Reported {player.NickName} for {reason}.");
         }
 

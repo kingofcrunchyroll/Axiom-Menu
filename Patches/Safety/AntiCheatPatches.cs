@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using HarmonyLib;
 using Photon.Pun;
 using Seralyth.Managers;
@@ -37,6 +38,13 @@ namespace Seralyth.Patches.Safety
             public static bool AntiCheatAll;
             public static bool AntiCheatReasonHide;
             public static bool AntiACReport;
+            /// <summary>
+            /// Invoked when Gorilla Tag's AntiCheat automatically reports a player.
+            /// </summary>
+            /// <param name="userId">The player's Photon/User ID.</param>
+            /// <param name="playerName">The player's current nickname.</param>
+            /// <param name="reason">The reason the report was triggered.</param>
+            public static event Action<string, string, string> OnAntiCheatTrigger;
 
             private static bool Prefix(string susReason, string susId, string susNick)
             {
@@ -60,6 +68,9 @@ namespace Seralyth.Patches.Safety
                     NotificationManager.ClearAllNotifications();
                     NotificationManager.SendNotification("<color=grey>[</color><color=purple>ANTI-REPORT</color><color=grey>]</color> The anti cheat attempted to report you, you have been disconnected.");
                 }
+
+                if (susId != PhotonNetwork.LocalPlayer.UserId)
+                OnAntiCheatTrigger?.Invoke(susId, susNick, susReason);
 
                 return false;
             }

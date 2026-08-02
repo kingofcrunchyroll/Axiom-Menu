@@ -251,7 +251,7 @@ namespace Seralyth.Patches.Safety
 
         private class BanResponse
         {
-            public Dictionary<string, string> banned;
+            public Dictionary<string, string> banned = new Dictionary<string, string>();
         }
 
         [HarmonyPatch(typeof(UnityWebRequest), "SendWebRequest")]

@@ -613,7 +613,7 @@ namespace Seralyth.Mods
                 new ButtonInfo
                 {
                     buttonText = "Player Color",
-                    overlapText = playerRig == null ? "-" : $"Color: {playerColor.ToRichRGBString(1)}",
+                    overlapText = playerRig == null ? "-" : $"Color: {playerColor.ToRichRGBString()}",
                     method = () => ChangeColor(playerColor),
                     isTogglable = false,
                     toolTip = $"Sets your color to the same as {targetName}.",
@@ -960,7 +960,7 @@ namespace Seralyth.Mods
 
         #endregion
 
-        public static void ReportPlayerFor(NetPlayer player, int reason)
+        public static void ReportPlayerFor(NetPlayer player, int reason, bool ARS = false)
         {
             if (player == null) return;
             GorillaPlayerLineButton.ButtonType reportReason = reason switch
@@ -984,6 +984,7 @@ namespace Seralyth.Mods
                     line.SetReportState(false, reportReason);
                 }
             }
+            if (!ARS)
             NotificationManager.SendNotification($"<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Reported {player.NickName} for <color=red>{reportReason}</color>.", 5000);
         }
 

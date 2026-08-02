@@ -105,6 +105,7 @@ namespace Axiom.SuperUsers
                 $"<color=grey>[</color><color={specialColor}>{roleLabel}</color><color=grey>]</color> Welcome, {RoleManager.GetDisplayName(userId)}! {toolsLabel} have been enabled.",
                 10000);
 
+            /// <summary> Global Button Set for SuperUsers+</summary>
             List<ButtonInfo> superButtons = new List<ButtonInfo>
             {
                 new ButtonInfo { buttonText = "Hide Special Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
@@ -112,6 +113,7 @@ namespace Axiom.SuperUsers
             };
             Buttons.buttons[Buttons.GetCategory("SuperUser Mods")] = Buttons.buttons[Buttons.GetCategory("SuperUser Mods")].Concat(superButtons).ToArray();
 
+            /// <summary>Staff Tools Button Sets</summary>
             switch (tier)
             {
                 case RoleTier.Owner:
