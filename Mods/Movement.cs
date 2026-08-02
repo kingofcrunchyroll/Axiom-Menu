@@ -2399,7 +2399,6 @@ namespace Seralyth.Mods
             }
         }
 
-        public static bool LegacySpiderWalk = false;
         static Quaternion spiderRot;
         static Quaternion tappedRot;
         public static void SpiderWalk()
@@ -2427,7 +2426,7 @@ namespace Seralyth.Mods
         static float flipStart;
         static Quaternion flipFrom;
         static Vector3 flipAxis;
-        const float flipDuration = 1f;
+        const float flipDuration = 0.65f;
 
         public static void Flip()
         {
@@ -3035,6 +3034,22 @@ namespace Seralyth.Mods
         public static bool lastRG;
         static bool flag = false;
 
+        public static IEnumerator InvisRoutine()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 84, false, 999999f); //play the pop sound
+                RPCProtection();
+            }
+            else
+                VRRig.LocalRig.PlayHandTapLocal(84, false, 999999f);
+
+            yield return new WaitForSeconds(0.15f);
+
+            VRRig.LocalRig.enabled = false;
+            VRRig.LocalRig.transform.position = GorillaTagger.Instance.bodyCollider.transform.position - Vector3.up* 99999f;
+        }
+
         public static void Invisible()
         {
             bool hit = rightSecondary;
@@ -3045,16 +3060,8 @@ namespace Seralyth.Mods
                 if (!flag)
                 {
                     flag = true; // basically a debounce so it doesn't spam the sound effect
-                    if (PhotonNetwork.InRoom)
-                    {
-                        GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 84, false, 999999f); //play the pop sound
-                        RPCProtection();
-                    }
-                    else
-                        VRRig.LocalRig.PlayHandTapLocal(84, false, 999999f);
+                    CoroutineManager.instance.StartCoroutine(InvisRoutine());
                 }
-                VRRig.LocalRig.enabled = false;
-                VRRig.LocalRig.transform.position = GorillaTagger.Instance.bodyCollider.transform.position - Vector3.up * 99999f;
             }
             else
                 flag = false; // just resets it

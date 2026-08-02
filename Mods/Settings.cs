@@ -500,6 +500,8 @@ namespace Seralyth.Mods
 
         public static void NavigatePlayer(NetPlayer player)
         {
+            if (player == null) PlayersTab();
+
             string targetName = player.NickName;
 
             VRRig playerRig = GetVRRigFromPlayer(player) ?? null;
@@ -611,7 +613,7 @@ namespace Seralyth.Mods
                 new ButtonInfo
                 {
                     buttonText = "Player Color",
-                    overlapText = playerRig == null ? "-" : $"Color: {playerColor.ToRichRGBString()}",
+                    overlapText = playerRig == null ? "-" : $"Color: {playerColor.ToRichRGBString(1)}",
                     method = () => ChangeColor(playerColor),
                     isTogglable = false,
                     toolTip = $"Sets your color to the same as {targetName}.",
@@ -705,12 +707,12 @@ namespace Seralyth.Mods
             }
 
             
-            if (RoleManager.GetRoleTier(localUserId) == RoleTier.Moderator || RoleManager.GetRoleTier(localUserId) == RoleTier.Developer)
+            if (RoleManager.IsUserStaff(localUserId))
             {
                 if (!BlacklistManager.TryGetEntry(player.UserId, out IssuerRank _, out string _))
                     buttons.Add(new ButtonInfo { buttonText = "Ban Player", overlapText = $"Ban {targetName} from using Axiom", method = () => { PromptText("Enter Ban Reason", () => CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(localUserId, player.UserId, RoleManager.GetRoleTier(localUserId).ToString(), keyboardInput, onComplete: (success, error) => { if (success) NotificationManager.SendNotification($"<color=grey>[</color><color=green>Success</color><color=grey>]</color> Banned {targetName} successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=grey>[</color><color=red>Ban failed</color><color=grey>]</color>: {error}", 8000); })), () => NavigatePlayer(player), "Ban", "Cancel"); SpawnKeyboard(); }, isTogglable = false, toolTip = $"Bans {targetName} from Axiom" });
                 else
-                    buttons.Add(new ButtonInfo { buttonText = "View Ban Reason", overlapText = $"View {targetName}'s Ban Reason" , method = () => PromptSingle($"Ban Reason: {BlacklistManager.GetReason(player.UserId)}"), isTogglable = false, toolTip = $"Lets you view {targetName}'s Ban Reason"});
+                    buttons.Add(new ButtonInfo { buttonText = "View Ban Reason", overlapText = $"View {targetName}'s Ban Reason" , method = () => PromptSingle($"Ban Reason:\n{BlacklistManager.GetReason(player.UserId)}"), isTogglable = false, toolTip = $"Lets you view {targetName}'s Ban Reason"});
             }
 
             Buttons.buttons[Buttons.GetCategory("Temporary Category")] = buttons.ToArray();
@@ -4931,14 +4933,14 @@ namespace Seralyth.Mods
         // Thanks to kingofnetflix for inspiration and support with voice recognition
         private static KeywordRecognizer mainPhrases;
         private static KeywordRecognizer modPhrases;
-        private static string[] keyWords = { "jarvis", "axiom", "hey axiom", "8 axiom", "asheume", "pay axiom", "accion", "axion", "axe serum", "axioms", "axiomm", "axiem", "axiam", "axiomn", "axiome", "axion", "axions", "action", "actions", "actium", "axon", "axons", "acxiom", "axiomic" };
+        private static string[] keyWords = { "jarvis", "axiom", "hey axiom", "Axiom", "Hey Axiom", "Hey axiom"};
         private static readonly string[] cancelKeywords = { "nevermind", "cancel", "never mind", "stop", "not you" };
         public static void VoiceRecognitionOn()
         {
             if (!File.Exists($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt"))
                 File.WriteAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt", keyWords);
             keyWords = File.ReadAllLines($"{PluginInfo.BaseDirectory}/Axiom_Keywords.txt");
-            mainPhrases = new KeywordRecognizer(keyWords);
+            mainPhrases = new KeywordRecognizer(keyWords, ConfidenceLevel.High);
             mainPhrases.OnPhraseRecognized += ModRecognition;
             mainPhrases.Start();
         }
@@ -5216,6 +5218,44 @@ namespace Seralyth.Mods
             };
 
             drec?.Start();
+            yield break;
+        }
+
+        public static IEnumerator Subtitles()
+        {
+            if (drec != null)
+            {
+                drec.Stop();
+                drec.Dispose();
+            }
+
+            drec = new DictationRecognizer();
+
+            drec.DictationHypothesis += (text) =>
+            {
+                NotificationManager.ClearAllNotifications();
+
+                NotificationManager.SendNotification(
+                    $"<color=grey>[</color><color=green>VOICE</color><color=grey>]</color> {text}"
+                );
+            };
+
+            drec.DictationResult += (text, confidence) =>
+            {
+                NotificationManager.SendNotification(
+                    $"<color=grey>[</color><color=cyan>FINAL</color><color=grey>]</color> {text} ({confidence})"
+                );
+            };
+
+            drec.DictationError += (error, hresult) =>
+            {
+                NotificationManager.SendNotification(
+                    $"<color=grey>[</color><color=red>VOICE ERROR</color><color=grey>]</color> {error}"
+                );
+            };
+
+            drec.Start();
+
             yield break;
         }
 

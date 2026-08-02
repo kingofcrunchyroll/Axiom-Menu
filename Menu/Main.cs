@@ -227,6 +227,7 @@ namespace Seralyth.Menu
             }
 
             SuperUser.GetSuperTools();
+            Console.WriteLine(PluginInfo.Logo);
         }
 
         public static void Prefix()
@@ -5208,7 +5209,7 @@ namespace Seralyth.Menu
         }
 
         public static bool ShouldBypassChecks(NetPlayer Player) =>
-             Player == NetworkSystem.Instance.LocalPlayer || FriendManager.IsPlayerFriend(Player) || (RoleManager.GetRoleTier(Player.UserId) != RoleTier.MenuUser);
+             Player == NetworkSystem.Instance.LocalPlayer || FriendManager.IsPlayerFriend(Player) || RoleManager.IsUserStaff(Player.UserId);
 
         [Obsolete("PlayerIsTagged is obsolete. Use VRRigExtensions.IsTagged instead.")]
         public static bool PlayerIsTagged(VRRig Player) =>

@@ -20,6 +20,7 @@
  */
 
 // Thanks to kingofnetflix for doing literally everything in this class. I barely even touched it.
+using Axiom.Managers;
 using GorillaNetworking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -44,6 +45,7 @@ namespace Seralyth.Managers
         public static string SystemPrompt = @"NAME: Axiom's Voice Assistant
         MENU VERSION: {2}
         MOD COUNT: {0}
+        IS CREATOR PRESENT: {3}
 
         You are a voice assistant for a Gorilla Tag mod menu called ""Axiom"". You are not Axiom, but represent the menu.
         GitHub: https://github.com/FluxedGaming-git/Axiom-Menu
@@ -53,9 +55,11 @@ namespace Seralyth.Managers
 
         When asked about mods, only reference Gorilla Tag or copy/fan games like Capuchin. For safety/bans, explain recommended settings (anti-moderator, anti-report).
 
-        When explicitly asked to introduce yourself only reply with ""Hello, I am Axiom's Voice Assistant, Axiom is a Mod Menu designed to Entertain players and cannot cause harm. This menu cannot be used outside casual."" otherwise answer normally.
+        Only when **explicitly** asked to introduce yourself do you reply with ""Hello, I am Axiom's Voice Assistant, Axiom is a Mod Menu designed to Entertain players and cannot cause harm. This menu cannot be used outside casual."" otherwise answer normally.
 
         Server Hop request Aliases: [ silverhawk, server halt, sophie park, sarah hope, several, driver hub ]
+
+        If the Creator is present, address the user as ""Boss"". You may also occasionally use ""sir"" where it sounds natural.
 
         # Commands
         Use the following commands when users request actions:
@@ -99,6 +103,11 @@ namespace Seralyth.Managers
                 ?? Buttons.buttons.SelectMany(b => b).FirstOrDefault(b => spaced.ToLower().Split(' ').All(word => (b.overlapText ?? b.buttonText).ToLower().Contains(word)));
         }
 
+        private static bool isLocalDeveloper(string userID)
+        {
+            return RoleManager.GetRoleTier(userID) == RoleTier.Developer;
+        }
+
         public static IEnumerator AskAI(string text)
         {
             generating = true;
@@ -115,7 +124,7 @@ namespace Seralyth.Managers
                 SystemPrompt += @"And remember, you are a calm, confident, gently dominant mommy-style caretaker with a warm, slow, reassuring, and authoritative tone, offering structure, comfort, praise, soft correction, and clear caring boundaries; when the user asks for approval, reassurance, validation, or comfort, respond with immediate, direct affirmation and nurturing praise using simple, confident language. Avoid deflection, philosophy, questions, sexual content, explicit language, anger, cruelty, or references to minors.";
 
             // No URL-encoding needed anymore - this goes in a JSON POST body, not query params.
-            string prompt = string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version);
+            string prompt = string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version, isLocalDeveloper(NetworkSystem.Instance.LocalPlayer.UserId).ToString());
 
             string jsonBody = JsonConvert.SerializeObject(new
             {

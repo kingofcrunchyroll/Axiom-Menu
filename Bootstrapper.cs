@@ -31,6 +31,7 @@ using System.Linq;
 using UnityEngine;
 using Axiom.Managers;
 using Photon.Pun;
+using Axiom.ARS;
 
 namespace Seralyth
 {
@@ -101,6 +102,7 @@ namespace Seralyth
             RoleManager.StartPolling(coroutineManager);
             BlacklistManager.StartPolling(coroutineManager);
             coroutineManager.StartCoroutine(MenuLockManager.CheckAndEnforce(coroutineManager));
+            coroutineManager.StartCoroutine(AutomaticReportSystem.LoadNames());
         }
 
         private static IEnumerator PatchIntegrityCheck()

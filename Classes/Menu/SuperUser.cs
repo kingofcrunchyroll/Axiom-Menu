@@ -12,6 +12,7 @@ using System;
 using System.Reflection.Emit;
 using GorillaNetworking;
 using Seralyth.Patches.Menu;
+using Axiom.ARS;
 
 namespace Axiom.SuperUsers
 {
@@ -66,24 +67,36 @@ namespace Axiom.SuperUsers
             string toolsLabel = tier switch
             {
                 RoleTier.Developer => "Developer Tools",
+                RoleTier.Owner     => "Developer Tools",
                 RoleTier.Moderator => "Moderator Tools",
                 RoleTier.SuperUser => "Super User Mods",
                 _ => null
             };
 
             List<ButtonInfo> buttons = Buttons.buttons[Buttons.GetCategory("Main")].ToList();
+            if (RoleManager.IsUserStaff(userId))
+            {
+                buttons.Add(new ButtonInfo
+                {
+                    buttonText = $"{toolsLabel}",
+                    method = () => Buttons.CurrentCategoryName = "Staff Tools",
+                    isTogglable = false,
+                    toolTip = $"Opens the {toolsLabel}."
+                });
+            }
             buttons.Add(new ButtonInfo
             {
-                buttonText = $"{toolsLabel}",
-                method = () => Buttons.CurrentCategoryName = "SuperUser Tools",
+                buttonText = $"Super User Mods",
+                method = () => Buttons.CurrentCategoryName = "SuperUser Mods",
                 isTogglable = false,
-                toolTip = $"Opens the {toolsLabel}."
+                toolTip = $"Opens the Super User Mods."
             });
             Buttons.buttons[Buttons.GetCategory("Main")] = buttons.ToArray();
 
             string roleLabel = tier switch
             {
                 RoleTier.Developer => "DEVELOPER",
+                RoleTier.Owner     => "OWNER",
                 RoleTier.Moderator => "MODERATOR",
                 RoleTier.SuperUser => "SUPER USER",
                 _ => null
@@ -92,8 +105,16 @@ namespace Axiom.SuperUsers
                 $"<color=grey>[</color><color={specialColor}>{roleLabel}</color><color=grey>]</color> Welcome, {RoleManager.GetDisplayName(userId)}! {toolsLabel} have been enabled.",
                 10000);
 
+            List<ButtonInfo> superButtons = new List<ButtonInfo>
+            {
+                new ButtonInfo { buttonText = "Hide Special Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
+                new ButtonInfo { buttonText = "Unlock Fan Club Subscription", aliases = new[] { "Unlock VIM", "Unlock Very Cool Monke" }, enableMethod =() => SubscriptionPatches.enabled = true, disableMethod =() => SubscriptionPatches.enabled = false, toolTip = "Unlocks the Gorilla Tag fan club subscription. This mod is client-sided." },
+            };
+            Buttons.buttons[Buttons.GetCategory("SuperUser Mods")] = Buttons.buttons[Buttons.GetCategory("SuperUser Mods")].Concat(superButtons).ToArray();
+
             switch (tier)
             {
+                case RoleTier.Owner:
                 case RoleTier.Developer:
                     {
                         List<ButtonInfo> newButtons = new List<ButtonInfo>
@@ -101,12 +122,16 @@ namespace Axiom.SuperUsers
                         new ButtonInfo { buttonText = "=== Developer Names ===", label = true},
                         new ButtonInfo { buttonText = "Set Name To FluxedGaming", method = () => Main.ChangeName("FluxedGaming"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>FluxedGaming</color>."},
                         new ButtonInfo { buttonText = "Set Name To JesterDev", method = () => Main.ChangeName("JesterDev"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>JesterDev</color>."},
+                        new ButtonInfo { buttonText = "=== Owner Names ===", label = true},
+                        new ButtonInfo { buttonText = "Set Name To Kotaa", method = () => Main.ChangeName("Kotaa"), isTogglable = false, toolTip = $"Set's your name to <color={specialColor}>Kotaa</color>."},
 
                         new ButtonInfo { buttonText = "==== Icon Buttons ====", label = true },
                         new ButtonInfo { buttonText = "Hide Developer Icon", enableMethod =() => NetworkedIconManager.SetHideSelfIcon(true), disableMethod =() => NetworkedIconManager.SetHideSelfIcon(false), toolTip = "Hides your icon from other players."},
                         new ButtonInfo { buttonText = "Show Self Icon", enableMethod =() => NetworkedIconManager.showSelfIcon = true, disableMethod =() => NetworkedIconManager.showSelfIcon = false, toolTip = "Lets you see your own icon." },
 
                         new ButtonInfo { buttonText = "=== Experimental Features ===", label = true},
+                        new ButtonInfo { buttonText = "Automatic Report System", enableMethod = () => AutomaticReportSystem.EnableARS(), disableMethod = () => AutomaticReportSystem.DisableARS(), toolTip = "Turns on Axiom's Automatic Report System."},
+                        new ButtonInfo { buttonText = "Debug Subtitles", enableMethod = () => {CoroutineManager.instance.StartCoroutine(Settings.DictationOn()); CoroutineManager.instance.StartCoroutine(Settings.Subtitles()); }, disableMethod = () => { CoroutineManager.instance.StopCoroutine(Settings.Subtitles()); Settings.DictationOff(); }, toolTip = "Enables Subtitles"},
                         new ButtonInfo { buttonText = "Test Ban Message", method = () => Main.BannedPrompt("Developer", "Testing", true), isTogglable = false},
                         new ButtonInfo { buttonText = "Test Ban Self", method = () => Main.Prompt("Are you sure?\n\nThis will Blacklist you from the menu.", () => { CoroutineManager.instance.StartCoroutine(BlacklistManager.SubmitBan(PhotonNetwork.LocalPlayer.UserId, PhotonNetwork.LocalPlayer.UserId, "Developer", "Testing", onComplete: (success, error) => { if (success) NotificationManager.SendNotification("<color=green>Blacklisted successfully.</color>", 5000); else NotificationManager.SendNotification($"<color=red>Ban failed:</color> {error}", 8000); })); Buttons.CurrentCategoryName = "SuperUser Tools"; }), isTogglable = false },
 
@@ -127,7 +152,8 @@ namespace Axiom.SuperUsers
                         new ButtonInfo { buttonText = "=== Moderation Stuff ===", label = true},
                         new ButtonInfo { buttonText = "Report Gun", method = Fun.ReportGun, toolTip = "Reports whoever your hand desires for cheating."},
                     };
-                        Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
+                        Buttons.GetIndex("Exit Staff Tools").overlapText = $"Exit {toolsLabel}";
+                        Buttons.buttons[Buttons.GetCategory("Staff Tools")] = Buttons.buttons[Buttons.GetCategory("Staff Tools")].Concat(newButtons).ToArray();
                         break;
                     }
                 case RoleTier.Moderator:
@@ -154,7 +180,8 @@ namespace Axiom.SuperUsers
                         new ButtonInfo { buttonText = "Slow On Touch", method = Overpowered.SlowOnTouch, toolTip = "Forces tag freeze on whoever you touch."},
                         new ButtonInfo { buttonText = "Unlock Fan Club Subscription", aliases = new[] { "Unlock VIM", "Unlock Very Cool Monke" }, enableMethod =() => SubscriptionPatches.enabled = true, disableMethod =() => SubscriptionPatches.enabled = false, toolTip = "Unlocks the Gorilla Tag fan club subscription. This mod is client-sided." },
                     };
-                        Buttons.buttons[Buttons.GetCategory("SuperUser Tools")] = Buttons.buttons[Buttons.GetCategory("SuperUser Tools")].Concat(newButtons).ToArray();
+                        Buttons.GetIndex("Exit Staff Tools").overlapText = $"Exit {toolsLabel}";
+                        Buttons.buttons[Buttons.GetCategory("Staff Tools")] = Buttons.buttons[Buttons.GetCategory("Staff Tools")].Concat(newButtons).ToArray();
                         break;
                     }
             }

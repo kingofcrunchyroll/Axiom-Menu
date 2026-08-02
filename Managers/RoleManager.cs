@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlayFab.ClientModels;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -78,6 +79,28 @@ namespace Axiom.Managers
         {
             return cachedRoles.TryGetValue(userId, out RoleEntry entry) ? entry.Name : null;
         }
+
+        #region Public Bools
+
+        public static bool IsUserDeveloper(string userId) =>
+            GetRoleTier(userId) == RoleTier.Developer;
+
+        public static bool IsUserOwner(string userId) =>
+             GetRoleTier(userId) == RoleTier.Owner;
+
+        public static bool IsUserModerator(string userId) =>
+             GetRoleTier(userId) == RoleTier.Moderator;
+
+        public static bool IsUserSuper(string userId) =>
+             GetRoleTier(userId) >= RoleTier.SuperUser;
+
+        public static bool IsUserStaff(string userId) =>
+             GetRoleTier(userId) >= RoleTier.Moderator;
+
+        public static bool IsUserTester(string userID) =>
+            GetRoleTier(userID) == RoleTier.Tester;
+
+        #endregion
 
         // Call once on startup (e.g. from your BasePlugin.Load or an existing manager init)
         public static void StartPolling(MonoBehaviour host)
