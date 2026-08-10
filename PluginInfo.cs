@@ -27,7 +27,7 @@ namespace Seralyth
         public const string Name = "Axiom Menu";
         public const string Description = "The 'More Legal' Seralyth, A Mod Menu built to Entertain.";
         public const string BuildTimestamp = "2026-07-08T15:58:08Z";
-        public const string Version = "1.5.8";
+        public const string Version = "1.6.0";
 
         public const string BaseDirectory =
 #if LEGAL || LEGAL_DEBUG
