@@ -23,7 +23,7 @@ namespace Seralyth.Mods
 
         public static bool IsPrivateOrModded()
         {
-            return GorillaGameManager.instance.GameType().ToString().ToUpperInvariant().Contains("MODDED") || !PhotonNetwork.CurrentRoom.IsVisible;
+            return PhotonNetwork.CurrentRoom.CustomProperties.ToString().Contains("MODDED") || !PhotonNetwork.CurrentRoom.IsVisible;
         }
 
         public static void CheckAndUpdate()

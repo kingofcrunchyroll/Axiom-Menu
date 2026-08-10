@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using PlayFab.ClientModels;
 using UnityEngine;
 using UnityEngine.Networking;
+using Seralyth;
 
 namespace Axiom.Managers
 {
@@ -40,8 +40,7 @@ namespace Axiom.Managers
     public static class RoleManager
     {
         // Raw GitHub content URL - swap "main" for your default branch name if different
-        private const string SuperUsersUrl =
-            "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/main/SuperUsers.json";
+        private const string SuperUsersUrl = PluginInfo.AxiomServerPath + "SuperUser/superusers.json";
 
         private const float RefreshIntervalSeconds = 300f; // 5 minutes
 

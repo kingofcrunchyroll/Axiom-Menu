@@ -43,18 +43,20 @@ namespace Axiom.Managers
         public Texture2D moderatorTexture;
         public Texture2D blacklistTexture;
         public Texture2D developerTexture;
+        public Texture2D ownerTexture;
         public Texture2D eaTexture;
         public Texture2D testerTexture;
 
         public void Awake()
         {
             menuUserTexture = SafeLoadResource($"{PluginInfo.ClientResourcePath}.icon.png");
-            superUserTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/superuser.png", "superuser.png");
-            moderatorTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/moderator.png", "moderator.png");
-            blacklistTexture = SafeLoadURL($"{PluginInfo.ServerResourcePath}/Images/Mods/Visuals/warning.png", "warning.png");
-            developerTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/crown.png", "crown.png");
-            eaTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/earlyaccess.png", "earlyaccess.png");
-            testerTexture = SafeLoadURL($"{PluginInfo.AxiomServerPath}/tester.png", "tester.png");
+            superUserTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/superuser.png", "superuser.png");
+            moderatorTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/moderator.png", "moderator.png");
+            blacklistTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/banned.png", "banned.png");
+            developerTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/jester.png", "jester.png");
+            ownerTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/crown.png", "crown.png");
+            eaTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/earlyaccess.png", "earlyaccess.png");
+            testerTexture = SafeLoadURL($"{PluginInfo.SuperUserResourcePath}/tester.png", "tester.png");
 
             // Custom properties are per-room in Photon, so re-broadcast on every join rather
             // than once at startup - same pattern FriendManager already uses for its own check.
@@ -226,6 +228,9 @@ namespace Axiom.Managers
             {
                 case RoleTier.Developer:
                     EnsureMaterial(ref superUserMaterial, developerTexture);
+                    return superUserMaterial;
+                case RoleTier.Owner:
+                    EnsureMaterial(ref superUserMaterial, ownerTexture);
                     return superUserMaterial;
                 case RoleTier.Moderator:
                     EnsureMaterial(ref superUserMaterial, moderatorTexture);

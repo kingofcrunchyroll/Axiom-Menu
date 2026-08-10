@@ -147,6 +147,8 @@ namespace Seralyth.Menu
             }
             catch { }
 
+            SuperUser.GetSuperTools();
+
             try
             {
                 PluginManager.LoadPlugins();
@@ -226,7 +228,6 @@ namespace Seralyth.Menu
                     NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> {PatchHandler.PatchErrors} patch{(PatchHandler.PatchErrors > 1 ? "es" : "")} failed to initialize. Please report this as an issue to the GitHub repository.", 10000);
             }
 
-            SuperUser.GetSuperTools();
             Console.WriteLine(PluginInfo.Logo);
         }
 
@@ -5663,6 +5664,12 @@ namespace Seralyth.Menu
             if (Safety.spoofingPlatform)
                 Safety.SpoofPlatform(true);
             Safety.AvoidAnnoyingMonke();
+
+            if (BlacklistManager.TryGetEntry(Player.UserId, out IssuerRank _ , out string reason))
+            {
+                NotificationManager.SendNotification($"<color=grey>[</color><color=orange>Blacklisted</color><color=grey>]</color> {Player.NickName} is Blacklisted for {reason}. Report them?");
+                Prompt($"Report {Player.NickName}?", () => Settings.ReportPlayerFor(Player, 2));
+            }
         }
 
         private static void OnPlayerLeave(NetPlayer Player)

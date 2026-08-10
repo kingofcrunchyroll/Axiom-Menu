@@ -4,15 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
-using UnityEngine;
 using Seralyth.Classes.Menu;
 using Seralyth.Managers;
 using Seralyth.Mods;
 using System;
-using System.Reflection.Emit;
 using GorillaNetworking;
 using Seralyth.Patches.Menu;
 using Axiom.ARS;
+using static Seralyth.Utilities.AssetUtilities;
+using Seralyth;
+using Seralyth.Extensions;
 
 namespace Axiom.SuperUsers
 {
@@ -101,6 +102,8 @@ namespace Axiom.SuperUsers
                 RoleTier.SuperUser => "SUPER USER",
                 _ => null
             };
+            if (Main.dynamicSounds)
+                LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Menu/admin.ogg", "Audio/Menu/admin.ogg", clip => clip.Play(Main.buttonClickVolume / 10f));
             NotificationManager.SendNotification(
                 $"<color=grey>[</color><color={specialColor}>{roleLabel}</color><color=grey>]</color> Welcome, {RoleManager.GetDisplayName(userId)}! {toolsLabel} have been enabled.",
                 10000);

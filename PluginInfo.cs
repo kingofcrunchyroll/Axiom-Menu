@@ -37,7 +37,8 @@ namespace Seralyth
 #endif
         public const string ClientResourcePath = "AxiomMenu.Resources.Client";
         public const string ServerResourcePath = "https://raw.githubusercontent.com/Seralyth/Seralyth-Menu/master/Resources/Server";
-        public const string AxiomServerPath = "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/refs/heads/main/";
+        public const string AxiomServerPath = "https://raw.githubusercontent.com/kingofcrunchyroll/Axiom-Server-Data/master/";
+        public const string SuperUserResourcePath = AxiomServerPath + "/SuperUser/Resources";
         public const string ServerAPI = "https://menu.seralyth.software";
         public const string Logo = @"
                                           

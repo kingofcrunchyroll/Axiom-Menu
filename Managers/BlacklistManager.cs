@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using Seralyth;
 
 namespace Axiom.Managers
 {
@@ -12,6 +13,7 @@ namespace Axiom.Managers
     {
         None,
         Moderator,
+        Owner,
         Developer,
         Server
     }
@@ -34,8 +36,7 @@ namespace Axiom.Managers
 
     public static class BlacklistManager
     {
-        private const string BlacklistUrl =
-            "https://raw.githubusercontent.com/FluxedGaming-git/Axiom-Server/main/blacklist.json";
+        private const string BlacklistUrl = PluginInfo.AxiomServerPath + "SuperUser/blacklist.json";
 
         private const float RefreshIntervalSeconds = 300f; // 5 minutes
 
@@ -60,6 +61,7 @@ namespace Axiom.Managers
                 {
                     "Server" => IssuerRank.Server,
                     "Developer" => IssuerRank.Developer,
+                    "Owner"     => IssuerRank.Owner,
                     "Moderator" => IssuerRank.Moderator,
                     _ => IssuerRank.None
                 };

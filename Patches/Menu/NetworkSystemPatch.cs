@@ -31,7 +31,7 @@ namespace Seralyth.Patches.Menu
         {
             public static bool Prefix(string roomName, RoomConfig opts, int regionIndex = -1)
             {
-                if (Buttons.GetIndex("Unlock Fan Club Subscription").enabled)
+                if (SubscriptionPatches.enabled)
                 {
                     if (opts.MaxPlayers == 20)
                         opts.MaxPlayers = 10;
