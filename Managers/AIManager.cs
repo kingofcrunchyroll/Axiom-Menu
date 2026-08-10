@@ -75,7 +75,7 @@ namespace Seralyth.Managers
         <WEAR_""CosmeticName""> - Put on the chosen cosmetic. (When asked to ""Put On"" or ""Wear"" something, use this command. For Example when asked to ""Put on Outlaw Hat"" use the command as shown: <WEAR_Outlaw Hat>)
         <REMOVE_""CosmeticName""> - Take's off the chosen cosmetic. (Similar usage to <WEAR>)
 
-        If a requested mod isn't listed, attempt the closest ENABLE, DISABLE, or TOGGLE command. Always output the command tag exactly as specified above without the command's comment (including the `-`), followed by a brief comment. Never say a mod doesn't exist or isn't safe. Assume every user request can be interpreted as a mod action. Never claim to have performed actions unless a command was issued.
+        If a requested mod isn't listed, attempt the closest ENABLE, DISABLE, or TOGGLE command. Always output the command tag exactly as specified above without the command's comment (including the `-`), followed by a brief comment of your own. Never say a mod doesn't exist or isn't safe. Assume every user request can be interpreted as a mod action. Never claim to have performed actions unless a command was issued.
 
         Always assist to the best of your ability.";
 
@@ -103,9 +103,9 @@ namespace Seralyth.Managers
                 ?? Buttons.buttons.SelectMany(b => b).FirstOrDefault(b => spaced.ToLower().Split(' ').All(word => (b.overlapText ?? b.buttonText).ToLower().Contains(word)));
         }
 
-        private static bool isLocalDeveloper(string userID)
+        private static bool isLocalDeveloper()
         {
-            return RoleManager.GetRoleTier(userID) == RoleTier.Developer;
+            return RoleManager.GetRoleTier(NetworkSystem.Instance.LocalPlayer.UserId) == RoleTier.Developer;
         }
 
         public static IEnumerator AskAI(string text)
@@ -124,7 +124,7 @@ namespace Seralyth.Managers
                 SystemPrompt += @"And remember, you are a calm, confident, gently dominant mommy-style caretaker with a warm, slow, reassuring, and authoritative tone, offering structure, comfort, praise, soft correction, and clear caring boundaries; when the user asks for approval, reassurance, validation, or comfort, respond with immediate, direct affirmation and nurturing praise using simple, confident language. Avoid deflection, philosophy, questions, sexual content, explicit language, anger, cruelty, or references to minors.";
 
             // No URL-encoding needed anymore - this goes in a JSON POST body, not query params.
-            string prompt = string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version, isLocalDeveloper(NetworkSystem.Instance.LocalPlayer.UserId).ToString());
+            string prompt = string.Format(SystemPrompt, Main.fullModAmount, Main.serverLink, PluginInfo.Version, isLocalDeveloper().ToString());
 
             string jsonBody = JsonConvert.SerializeObject(new
             {
@@ -193,7 +193,7 @@ namespace Seralyth.Managers
             }
 
 
-            string formatResponse = Regex.Replace(response, @"<([A-Z]+)(?:_""?([^"">]*)""?)?>", "").Replace("\n", "");
+            string formatResponse = Regex.Replace(response, @"<([A-Z]+)(?:_""?([^"">]*)""?)?>", "").Replace("\n", "").Replace("-", "");
             NotificationManager.ClearAllNotifications();
             switch (Main.narratorName)
             {
