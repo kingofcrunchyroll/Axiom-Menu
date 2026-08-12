@@ -29,7 +29,7 @@ Currently I Added a **Mute** button and a **Report Category** to the Selected Pl
   <summary><b>💾 Installation</b></summary>
 	
 1. **Download** the latest release **[here](https://github.com/Axiom-Menu/Axiom/releases/latest)**
-2. **Drag & Drop** `Seralyth-Menu.dll` into your plugins folder  
+2. **Drag & Drop** `Axiom-Menu.dll` into your plugins folder  
 3. **Launch** Gorilla Tag and enjoy!
 
 **🧱 From Source Code (for developers!)**
